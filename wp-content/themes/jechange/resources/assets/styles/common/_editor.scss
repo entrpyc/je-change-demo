@@ -1,0 +1,68 @@
+#tinymce {
+  margin: 0 10px;
+
+  h1 {
+    display: block;
+    font-size: 2em;
+    font-weight: bold;
+  }
+  h2 {
+    display: block;
+    font-size: 1.5em;
+    font-weight: bold;
+  }
+  h3 {
+    display: block;
+    font-size: 1.22em;
+    font-weight: bold;
+  }
+  h4 {
+    display: block;
+    font-size: 1.17em;
+    font-weight: bold;
+  }
+  h5 {
+    display: block;
+    font-size: 1em;
+    font-weight: bold;
+  }
+  h6 {
+    display: block;
+    font-size: 0.88em;
+    font-weight: bold;
+  }
+  ul,
+  ul li {
+    list-style-type: circle !important;
+    margin-left: 20px;
+    padding-left: 0;
+  }
+  ol,
+  ol li {
+    list-style-type: decimal;
+    margin-left: 20px;
+    padding-left: 0;
+  }
+  p {
+    margin-bottom: 10px;
+  }
+  blockquote {
+    margin: 0 1.5em 1.5em 1.5em;
+    font-style: italic;
+    padding-left: 1em;
+    border-left: 3px solid gray;
+  }
+  img {
+    border: 0;
+    max-height: 400px;
+    width: auto;
+  }
+  table {
+    cursor: default;
+
+    td,
+    th {
+      cursor: text;
+    }
+  }
+}

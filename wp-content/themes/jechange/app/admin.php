@@ -51,3 +51,30 @@ add_action('admin_head', function () {
     <?php
 });
 
+
+/**
+ * Modify term slug with certain characters
+ *
+ * @param array $data = Array( 'name' => 'Term Name', 'slug' => 'term-slug', 'term_group' => 0 )
+ * @param string $taxonomy
+ * @param array $args
+ *
+ * @return array $data
+ */
+add_filter( 'wp_insert_term_data', function( $data, $taxonomy, $args ) {
+    if($taxonomy == 'service'){
+        $serviceTypeTermId = $args['acf']['field_5f2a8c8e63cdf'] ?? ''; // Service Type ACF Field
+        $serviceTypeTerm = get_term( $serviceTypeTermId, 'service_type' );
+        $data['slug'] = $serviceTypeTerm->slug . '/' . sanitize_title(str_replace(',', '-', $data['name']));
+    }
+    return $data;
+}, 99, 3);
+
+add_filter( 'wp_update_term_data', function( $data, $term_id, $taxonomy, $args ) {
+    if($taxonomy == 'service'){
+        $serviceTypeTermId = $args['acf']['field_5f2a8c8e63cdf'] ?? ''; // Service Type ACF Field
+        $serviceTypeTerm = get_term( $serviceTypeTermId, 'service_type' );
+        $data['slug'] = $serviceTypeTerm->slug . '/' . sanitize_title(str_replace(',', '-', $data['name']));
+    }
+    return $data;
+}, 99, 4);

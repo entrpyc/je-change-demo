@@ -62,6 +62,7 @@ add_action('admin_head', function () {
  * @return array $data
  */
 add_filter( 'wp_insert_term_data', function( $data, $taxonomy, $args ) {
+    // SERVICE_TYPE
     if($taxonomy == 'service_type'){
         $mapping = [
             'assurance' => 'assureurs',
@@ -70,15 +71,15 @@ add_filter( 'wp_insert_term_data', function( $data, $taxonomy, $args ) {
             'placement' => 'banques',
             'credit' => 'societes',
         ];
-
         // Create slug to be like energie/fournisseurs if exists in the mapping (migrated from the old site)
         if($mapping[$data['slug']]) {
             $data['slug'] = $data['slug'] . '/' . $mapping[$data['slug']];
         }
     }
+
+    // SERVICE
     if($taxonomy == 'service'){
-        $serviceTypeTermId = $args['acf']['field_5f2a8c8e63cdf'] ?? ''; // Service Type ACF Field
-        // $serviceTypeTerm = get_term( $serviceTypeTermId, 'service_type' );
+        $serviceTypeTermId = $args['acf']['field_5f2a8c8e63cdf'] ?? ''; // get service_type relational ACF Field
         $serviceTypeTermSingleSlug = get_field('single_slug', 'service_type_' . $serviceTypeTermId);
         $data['slug'] = $serviceTypeTermSingleSlug . '/' . $data['slug'];
     }
@@ -86,6 +87,8 @@ add_filter( 'wp_insert_term_data', function( $data, $taxonomy, $args ) {
 }, 99, 3);
 
 add_filter( 'wp_update_term_data', function( $data, $term_id, $taxonomy, $args ) {
+
+    // SERVICE_TYPE
     if($taxonomy == 'service_type'){
         $mapping = [
             'assurance' => 'assureurs',
@@ -95,19 +98,59 @@ add_filter( 'wp_update_term_data', function( $data, $term_id, $taxonomy, $args )
             'credit' => 'societes',
         ];
         // Create slug to be like energie/fournisseurs if exists in the mapping (migrated from the old site)
-        if($mapping[$data['slug']]) {
-            $data['slug'] = $data['slug'] . '/' . $mapping[$data['slug']];
+        $serviceTypeSingleSlug = $args['acf']['field_5f2aa976a332e'] ?? ''; // get single_slug ACF Field
+        if($mapping[$serviceTypeSingleSlug]) {
+            $data['slug'] = $serviceTypeSingleSlug . '/' . $mapping[$serviceTypeSingleSlug];
         }
-
-        // TODO update slug
-        //$data['slug'] = '';
     }
+
+    // SERVICE
     if($taxonomy == 'service'){
-        $serviceTypeTermId = $args['acf']['field_5f2a8c8e63cdf'] ?? ''; // Service Type ACF Field
+        $serviceTypeTermId = $args['acf']['field_5f2a8c8e63cdf'] ?? ''; //  get service_type relational ACF Field
         $serviceTypeTermSingleSlug = get_field('single_slug', 'service_type_' . $serviceTypeTermId);
         $data['slug'] = $serviceTypeTermSingleSlug . '/' . sanitize_title(str_replace(',', '-', $data['name']));
-        echo '<pre>';
-        dd($args);
+
     }
     return $data;
 }, 99, 4);
+
+
+
+/**
+ * Modify post slug
+ *
+ * @param array $data = Array( 'name' => 'Term Name', 'slug' => 'term-slug', 'term_group' => 0 )
+ * @param string $post
+ *
+ * @return array $data
+ */
+add_filter( 'wp_insert_post_data', function( $data, $postArr ) {
+
+    //return data if still there is no post id set
+    if(!$postArr['ID']) {
+        return $data;
+    }
+
+    // PROVIDER ARTICLE
+    if($postArr['post_type'] == 'provider') {
+        // TODO PROVIDER
+    }
+
+
+    // PROVIDER ARTICLE
+    if($postArr['post_type'] == 'provider_article') {
+        $serviceTypeTermId = $postArr['tax_input']['service_type'][0] ?? ''; // get first service type term from sidebar
+        $serviceTypeTerm = get_term( $serviceTypeTermId );
+        $serviceTypeTermSlug = $serviceTypeTerm->slug; // energie/fournisseurs
+
+        $providerId = $postArr['acf']['field_5f30f8420913c'][0] ?? ''; // get provider relational ACF field in Provider Article
+        $provider = get_post($providerId);
+        $providerSlug = $provider->post_name; // gazprom
+
+        $data['post_name'] = $serviceTypeTermSlug . '/' . $providerSlug . '/' . sanitize_title(str_replace(',', '-', $postArr['post_title']));
+    }
+
+    return $data;
+}, 1, 2);
+
+

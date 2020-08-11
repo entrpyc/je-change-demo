@@ -131,11 +131,14 @@ add_filter( 'wp_insert_post_data', function( $data, $postArr ) {
         return $data;
     }
 
+    // $serviceTypeTermId = $postArr['acf']['field_5f323c00dd861'];
+    // $serviceTermId = $postArr['acf']['field_5f3253a611f2b'];
+
     // PROVIDER 
     if($postArr['post_type'] == 'providers') {
         // TODO PROVIDER
+        $serviceTypeTermId = $postArr['acf']['field_5f323c00dd861'];
         
-        $serviceTypeTermId = $postArr['tax_input']['service_type'][0] ?? ''; // get first service type term from sidebar
         $serviceTypeTerm = get_term( $serviceTypeTermId );
         $serviceTypeTermSlug = $serviceTypeTerm->slug; // energie/fournisseurs
 
@@ -145,7 +148,7 @@ add_filter( 'wp_insert_post_data', function( $data, $postArr ) {
 
     // PROVIDER ARTICLE
     if($postArr['post_type'] == 'provider_article') {
-        $serviceTypeTermId = $postArr['tax_input']['service_type'][0] ?? ''; // get first service type term from sidebar
+        $serviceTypeTermId = $postArr['acf']['field_5f323c00dd861'];
         $serviceTypeTerm = get_term( $serviceTypeTermId );
         $serviceTypeTermSlug = $serviceTypeTerm->slug; // energie/fournisseurs
 
@@ -156,6 +159,14 @@ add_filter( 'wp_insert_post_data', function( $data, $postArr ) {
         $data['post_name'] = $serviceTypeTermSlug . '/' . $providerSlug . '/' . sanitize_title(str_replace(',', '-', $postArr['post_title']));
     }
 
+    
+    if($postArr['post_type'] == 'post' || $postArr['post_type'] == 'guides') {
+
+        $serviceTermId = $postArr['acf']['field_5f3253a611f2b'];
+        $serviceTerm = get_term( $serviceTermId );
+        $postType = ($postArr['post_type'] == 'post') ? 'news' : 'guides';
+        $data['post_name'] = $serviceTerm->slug . '/' . $postType . '/' . sanitize_title(str_replace(',', '-', $postArr['post_title']));
+    }
     return $data;
 }, 1, 2);
 

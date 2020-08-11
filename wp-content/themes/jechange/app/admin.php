@@ -131,9 +131,15 @@ add_filter( 'wp_insert_post_data', function( $data, $postArr ) {
         return $data;
     }
 
-    // PROVIDER ARTICLE
-    if($postArr['post_type'] == 'provider') {
+    // PROVIDER 
+    if($postArr['post_type'] == 'providers') {
         // TODO PROVIDER
+        
+        $serviceTypeTermId = $postArr['tax_input']['service_type'][0] ?? ''; // get first service type term from sidebar
+        $serviceTypeTerm = get_term( $serviceTypeTermId );
+        $serviceTypeTermSlug = $serviceTypeTerm->slug; // energie/fournisseurs
+
+        $data['post_name'] = $serviceTypeTermSlug . '/' . sanitize_title(str_replace(',', '-', $postArr['post_title']));
     }
 
 

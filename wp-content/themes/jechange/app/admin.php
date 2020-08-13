@@ -69,15 +69,11 @@ add_filter( 'wp_insert_post_data', function( $data, $postArr ) {
             $is_edit = false;
         }
     }
-    // todo change slug in edit mode
 
     //return data if still there is no post id set
     if(!$postArr['ID']) {
         return $data;
     }
-
-    // $serviceTypeTermId = $postArr['acf']['field_5f323c00dd861'];
-    // $serviceTermId = $postArr['acf']['field_5f3253a611f2b'];
     $mapping = [
         'assurance' => 'assureurs',
         'energie' => 'fournisseurs',
@@ -91,13 +87,18 @@ add_filter( 'wp_insert_post_data', function( $data, $postArr ) {
         $serviceTypeTermId = $postArr['acf']['field_5f323c00dd861'];
         
         $serviceTypeTerm = get_term( $serviceTypeTermId );
-        $serviceTypeTermSlug = $serviceTypeTerm->slug; // energie
-        if($mapping[$serviceTypeTermSlug]) {
-            $serviceTypeTermSlug .= '/' . $mapping[$serviceTypeTermSlug];// energie/fournisseurs
+        $slug = $serviceTypeTerm->slug; // energie
+        if($mapping[$slug]) {
+            $slug .= '/' . $mapping[$slug];// energie/fournisseurs
         }       
-
-
-        $data['post_name'] = $serviceTypeTermSlug . '/' . sanitize_title(str_replace(',', '-', $postArr['post_title']));
+        $newSlug = $postArr['acf']['field_5f353376ee826'];
+        if($newSlug != '') {
+            $slug .= '/' . $newSlug;
+        } 
+        else {
+            $slug .= '/' . sanitize_title(str_replace(',', '-', $postArr['post_title']));
+        }
+        $data['post_name'] = $slug;
     }
 
 
@@ -106,43 +107,68 @@ add_filter( 'wp_insert_post_data', function( $data, $postArr ) {
         $serviceTypeTermId = $postArr['acf']['field_5f323c00dd861'];
         
         $serviceTypeTerm = get_term( $serviceTypeTermId );
-        $serviceTypeTermSlug = $serviceTypeTerm->slug; // energie
-        if($mapping[$serviceTypeTermSlug]) {
-            $serviceTypeTermSlug .= '/' . $mapping[$serviceTypeTermSlug];// energie/fournisseurs
+        $slug = $serviceTypeTerm->slug; // energie
+        if($mapping[$slug]) {
+            $slug .= '/' . $mapping[$slug];// energie/fournisseurs
         }   
         
         $providerId = $postArr['acf']['field_5f30f8420913c'][0];
         $provider = get_post($providerId);
-        $serviceTypeTermSlug .= '/' . sanitize_title(str_replace(',', '-', $provider->post_title));// energie/fournisseurs/gazprom
-        
-        $serviceTypeTermSlug .= '/' . sanitize_title(str_replace(',', '-', $postArr['post_title'])); // energie/fournisseurs/gazprom/article
 
-        $data['post_name'] = $serviceTypeTermSlug;
+        $slug .= '/' . sanitize_title(str_replace(',', '-', $provider->post_title));// energie/fournisseurs/gazprom
+        $newSlug = $postArr['acf']['field_5f353376ee826'];
+        if($newSlug != '') {
+            $slug .= '/' . $newSlug;
+        } 
+        else {
+            $slug .= '/' . sanitize_title(str_replace(',', '-', $postArr['post_title'])); // energie/fournisseurs/gazprom/article
+        }
+
+        $data['post_name'] = $slug;
     }
 
-    
+    // POST (NEWS) && GUIDES
     if($postArr['post_type'] == 'post' ||  $postArr['post_type'] == 'guides') {
         $serviceTypeTermId = $postArr['acf']['field_5f323c00dd861'];
         $serviceTypeTerm = get_term( $serviceTypeTermId );
         $serviceTermId = $postArr['acf']['field_5f3253a611f2b'];
         $serviceTerm = get_term( $serviceTermId );
         $postType = ($postArr['post_type'] == 'post') ? 'news' : 'guides';
-        $data['post_name'] = $serviceTypeTerm->slug . '/' . $serviceTerm->slug . '/' . $postType . '/' . sanitize_title(str_replace(',', '-', $postArr['post_title']));
-    }
-    
-    if($postArr['post_type'] == 'page' ) {
-        $slug = '';
-        $serviceTypeTermId = $postArr['acf']['field_5f3402f389887'];
-        $serviceTypeTerm = get_term( $serviceTypeTermId );
-        $slug .= $serviceTypeTerm->slug . '/' ;
-
-        $serviceTermId = $postArr['acf']['field_5f34032989888'];
-        if($serviceTermId) {
-            $serviceTerm = get_term( $serviceTermId );
-            $slug .= $serviceTerm->slug . '/' ;
+        $slug = $serviceTypeTerm->slug . '/' . $serviceTerm->slug . '/' . $postType;
+        $newSlug = $postArr['acf']['field_5f353376ee826'];
+        if($newSlug != '') {
+            $slug .= '/' . $newSlug;
+        } 
+        else {
+            $slug .= '/' . sanitize_title(str_replace(',', '-', $postArr['post_title']));
         }
-        
-        $data['post_name'] =  $slug . sanitize_title(str_replace(',', '-', $postArr['post_title']));
+        $data['post_name'] = $slug;
+    }
+
+    // PRESS REVIEWS 
+    if($postArr['post_type'] == 'press_review' ) {
+        $slug = 'revuepresse';
+        $newSlug = $postArr['acf']['field_5f353376ee826'];
+        if($newSlug != '') {
+            $slug .= '/' . $newSlug;
+        } 
+        else {
+            $slug .= '/' . sanitize_title(str_replace(',', '-', $postArr['post_title']));
+        }
+        $data['post_name'] = $slug;
+    }
+
+    // PRESS RELEASES
+    if($postArr['post_type'] == 'press_release' ) {
+        $slug = 'communiques';
+        $newSlug = $postArr['acf']['field_5f353376ee826'];
+        if($newSlug != '') {
+            $slug .= '/' . $newSlug;
+        } 
+        else {
+            $slug .= '/' . sanitize_title(str_replace(',', '-', $postArr['post_title']));
+        }
+        $data['post_name'] = $slug;
     }
     return $data;
 }, 1, 2);
@@ -181,16 +207,9 @@ add_filter( 'post_link', function($post_link, $post) {
     $post_link = str_replace( '%post_name%/', $post->post_name, $post_link);
 	return $post_link;
 }, 10, 2 );
-/** fix %pagename% (duplicate slug) permalink in pages */
-add_filter( 'page_link', function($post_link, $post) {
-    $post_link = str_replace( '%pagename%/', $post->post_name, $post_link);
-	return $post_link;
-}, 10, 2 );
 
 /**
- * Have WordPress match postname to any of our public post types (post, page, race).
- * All of our public post types can have /post-name/ as the slug, so they need to be unique across all posts.
- * By default, WordPress only accounts for posts and pages where the slug is /post-name/.
+ * find post page by whole post_name /service_type/service/slug
  *
  * @param $query The current query.
  */
@@ -204,12 +223,15 @@ add_action('pre_get_posts', function ($query) {
     if (!isset($query->query['page']) || 2 !== count($query->query)) {
         return;
     }
+    // todo limit 1
     $query->set('exact_where', "post_name like '".$query->query['pagename']."'");
 
 
     return $query;
 });
-
+/**
+ * custom where filter
+ */
 add_filter( 'posts_where', function ( $where, $wp_query ) {
     if ( $extend_where = $wp_query->get( 'extend_where' ) ) {
         $where .= 'AND '. $extend_where;
@@ -220,10 +242,29 @@ add_filter( 'posts_where', function ( $where, $wp_query ) {
     return $where;
 }, 10, 2 );
 
-add_filter('posts_request', function ($input) {
-    if (!is_admin()) {
-        echo '<pre>', var_dump($input), '</pre>';
-    }
-    return $input;
-});
+/**
+ * sql dump
+ */
+// add_filter('posts_request', function ($input) {
+//     if (!is_admin()) {
+//         echo '<pre>', var_dump($input), '</pre>';
+//     }
+//     return $input;
+// });
 
+
+
+/**
+ * remove quick edit link in posts and custom posts
+ */
+add_filter('post_row_actions',function ( $actions ){
+    unset( $actions['inline hide-if-no-js'] );
+    return $actions;
+});
+/**
+ * remove quick edit link in pages
+ */
+add_filter('page_row_actions',function ( $actions ){
+    unset( $actions['inline hide-if-no-js'] );
+    return $actions;
+});

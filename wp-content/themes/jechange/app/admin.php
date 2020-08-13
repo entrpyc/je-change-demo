@@ -114,8 +114,11 @@ add_filter( 'wp_insert_post_data', function( $data, $postArr ) {
         
         $providerId = $postArr['acf']['field_5f30f8420913c'][0];
         $provider = get_post($providerId);
+        $providerSlug = $provider->post_name;
+        $explodeProviderSlug = explode('/', $providerSlug);
+        $providerSlug = end($explodeProviderSlug);
+        $slug .= '/' . $providerSlug;// energie/fournisseurs/gazprom
 
-        $slug .= '/' . sanitize_title(str_replace(',', '-', $provider->post_title));// energie/fournisseurs/gazprom
         $newSlug = $postArr['acf']['field_5f353376ee826'];
         if($newSlug != '') {
             $slug .= '/' . $newSlug;
@@ -224,7 +227,9 @@ add_action('pre_get_posts', function ($query) {
         return;
     }
     // todo limit 1
-    $query->set('exact_where', "post_name like '".$query->query['pagename']."'");
+    if(!$query->queried_object_id) {
+        $query->set('exact_where', "post_name like '".$query->query['pagename']."'");
+    }
 
 
     return $query;
@@ -245,12 +250,12 @@ add_filter( 'posts_where', function ( $where, $wp_query ) {
 /**
  * sql dump
  */
-// add_filter('posts_request', function ($input) {
-//     if (!is_admin()) {
-//         echo '<pre>', var_dump($input), '</pre>';
-//     }
-//     return $input;
-// });
+add_filter('posts_request', function ($input) {
+    if (!is_admin()) {
+        echo '<pre>', var_dump($input), '</pre>';
+    }
+    return $input;
+});
 
 
 

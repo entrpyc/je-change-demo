@@ -250,12 +250,12 @@ add_filter( 'posts_where', function ( $where, $wp_query ) {
 /**
  * sql dump
  */
-add_filter('posts_request', function ($input) {
-    if (!is_admin()) {
-        echo '<pre>', var_dump($input), '</pre>';
-    }
-    return $input;
-});
+// add_filter('posts_request', function ($input) {
+//     if (!is_admin()) {
+//         echo '<pre>', var_dump($input), '</pre>';
+//     }
+//     return $input;
+// });
 
 
 

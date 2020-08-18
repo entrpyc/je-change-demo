@@ -61,14 +61,6 @@ add_action('admin_head', function () {
  * @return array $data
  */
 add_filter( 'wp_insert_post_data', function( $data, $postArr ) {
-    // is in edit mode
-    $ref = $postArr["_wp_http_referer"] ?? null;
-    $is_edit = true;
-    if($ref) {
-        if(substr($ref, - strlen($postArr['post_type'])) == $postArr['post_type']) {
-            $is_edit = false;
-        }
-    }
 
     //return data if still there is no post id set
     if(!$postArr['ID']) {
@@ -82,6 +74,10 @@ add_filter( 'wp_insert_post_data', function( $data, $postArr ) {
         'credit' => 'societes',
     ];
 
+    // if($postArr['post_type'] == 'offer') {
+    // echo '<pre>', var_dump($data), '</pre>';
+    // echo '<pre>', var_dump($postArr), '</pre>';exit();
+    // }
     // PROVIDER 
     if($postArr['post_type'] == 'providers') {
         $serviceTypeTermId = $postArr['acf']['field_5f323c00dd861'];

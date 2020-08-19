@@ -9,11 +9,13 @@
         line-height: 150%;
         padding: 5px 15px;
         margin: 15px auto;
+        background-color: #fcfcfc !important;
     }
 
     .offer,
     .offer-wrapper {
         border: 1px solid #eee;
+        background-color: #fff;
     }
 
     .offer-row {

@@ -52,7 +52,7 @@
     </div>
 
     @foreach($fields['features'] as $feature) 
-        <div>{{ $feature['filter_id'] }}:  {{ $feature['filter_text'] }}</div>
+        <div>{{ $feature['filter_text'] }}</div>
     @endforeach
 
 </div>

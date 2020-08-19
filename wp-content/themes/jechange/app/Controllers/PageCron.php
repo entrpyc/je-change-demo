@@ -66,10 +66,10 @@ class PageCron extends Controller
 
         $time = strtotime($post->post_modified);
         $time = 0; // for delete 
-        $page = 1;
+        $page = 1; // api results
         do {
             $offers = $this->getOffers($post->post_content, $time, $page);
-            $page++;
+            $page++; // next page
             if (!$offers) {
                 return [];
             }
@@ -99,18 +99,18 @@ class PageCron extends Controller
 
             foreach ($offers['data'] as $offer) {
                 /*
-            // взимаме провайдер по записаното ID от апи-то
-            $args = array(
-            'meta_query' => array(
-                array(
-                    'key' => 'field_5f3a3e183cf26', // provider_id
-                    'value' => $offer['provider']['id'],
-                    'compare' => '=',
+                // взимаме провайдер по записаното ID от апи-то
+                $args = array(
+                'meta_query' => array(
+                    array(
+                        'key' => 'field_5f3a3e183cf26', // provider_id
+                        'value' => $offer['provider']['id'],
+                        'compare' => '=',
+                    )
                 )
-            )
-            );
-            $query = new WP_Query($args);
-            */
+                );
+                $query = new WP_Query($args);
+                */
 
 
                 // for the moment insert 

@@ -243,6 +243,17 @@ add_filter( 'posts_where', function ( $where, $wp_query ) {
     return $where;
 }, 10, 2 );
 
+
+add_filter('posts_orderby',function ( $orderby, $wp_query ) {
+    if ( $extend_orderby = $wp_query->get( 'extend_orderby' ) ) {
+        $orderby .= $extend_orderby;
+    }
+    if ( $exact_orderby = $wp_query->get( 'exact_orderby' ) ) {
+        $orderby = $exact_orderby;
+    }
+    return $orderby;
+}, 10, 2 );
+
 /**
  * sql dump
  */

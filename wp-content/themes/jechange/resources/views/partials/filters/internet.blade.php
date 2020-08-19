@@ -6,7 +6,7 @@ Dégroupage
 <br>
 <label><input type="checkbox" name="television" value="1" id="TV" @if($_GET['television'] == '1') checked @endif>Télévision</label>
 
-<label><input type="checkbox" name="telephonieMobile" value="1" id="Appel" @if($_GET['telephonieMobile'] == '1') checked @endif> Appels illimités vers les mobiles</label>
+TODO <label><input type="checkbox" name="telephonieMobile" value="1" id="Appel" @if($_GET['telephonieMobile'] == '1') checked @endif> Appels illimités vers les mobiles</label>
 
 <br>
 Débits :   

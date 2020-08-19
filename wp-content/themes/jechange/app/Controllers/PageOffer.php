@@ -136,11 +136,11 @@ class PageOffer extends Controller
 
             // mobile
             if ($request == 'telecom/mobile/forfait-bloque') { // limited
-                if($forfaitlimite) {
+                if(!$forfaitlimite) {
                     unset($posts[$k]);
                 }
             } else  if ($request == 'telecom/mobile/forfaitillimite') { // unlimited
-                if(!$forfaitlimite) {
+                if($forfaitlimite) {
                     unset($posts[$k]);
                 }
             }

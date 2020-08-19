@@ -33,16 +33,11 @@ class PageCron extends Controller
     {
         global $post;
         global $wpdb;
-        if(!$post) {
+        if (!$post) {
             throw new \Exception('no post');
         }
         $api_id = $post->ID;
-        $time = strtotime($post->post_modified);
-        $time = 0;
-        $offers = $this->getOffers($post->post_content, $time);
-        if(!$offers) {
-            return [];
-        }
+
         /**
          * acf fields
          */
@@ -56,8 +51,8 @@ class PageCron extends Controller
         $acf['field_5f36961e5d79b'] = 'title_original';
         $acf['field_5f3696505d79c'] = 'description';
         $acf['field_5f36965f5d79d'] = 'description_original';
-        // $acf['field_5f3696c9dcc84'] = 'features';
-        // $acf['field_5f3696dbdcc85'] = 'features_original';
+        $acf['field_5f3bcf11a9cd5'] = 'features'; // repeater
+        $acf['field_5f3bd6bfd00dd'] = 'features_original';
         $acf['field_5f3a38f503168'] = 'pictograms';
         $acf['field_5f3a391003169'] = 'pictograms_original';
         $acf['field_5f3b7b5243c39'] = 'call_center_phone';
@@ -69,34 +64,41 @@ class PageCron extends Controller
         $acf['field_5f3b86e4b28d9'] = 'valid_from';
         $acf['field_5f3b86fcb28da'] = 'valid_to';
 
-        $acf['field_5f3bcf11a9cd5'] = 'features';
-        $acf['field_5f3bd6bfd00dd'] = 'features_original';
+        $time = strtotime($post->post_modified);
+        $time = 0; // for delete 
+        $page = 1;
+        do {
+            $offers = $this->getOffers($post->post_content, $time, $page);
+            $page++;
+            if (!$offers) {
+                return [];
+            }
 
-        $offers_ids = [];// check if already exists
-        $posts_for_update = [];// post for update
-        foreach ($offers['data'] as $offer) {
-            $offers_ids[] = $offer['id'];
-        }
-        // get existing posts
-        $args = array(
-            'post_type' => 'offer',
-            'meta_query' => array(
-                array(
-                    'key' => 'offer_id', // provider_id
-                    'value' => implode(',', $offers_ids),
-                    'compare' => 'in',
+            $offers_ids = []; // check if already exists
+            $posts_for_update = []; // post for update
+            foreach ($offers['data'] as $offer) {
+                $offers_ids[] = $offer['id'];
+            }
+            // get existing posts
+            $args = array(
+                'post_type' => 'offer',
+                'meta_query' => array(
+                    array(
+                        'key' => 'offer_id', // provider_id
+                        'value' => implode(',', $offers_ids),
+                        'compare' => 'in',
+                    )
                 )
-            )
-        );
-        $query = new \WP_Query($args);
+            );
+            $query = new \WP_Query($args);
 
-        // mark which offer ids are for update
-        foreach ($query->posts as $k => $post) {
-            $posts_for_update[get_post_meta($post->ID, 'offer_id')[0]] = $post->ID;
-        }
+            // mark which offer ids are for update
+            foreach ($query->posts as $k => $post) {
+                $posts_for_update[get_post_meta($post->ID, 'offer_id')[0]] = $post->ID;
+            }
 
-        foreach ($offers['data'] as $offer) {
-            /*
+            foreach ($offers['data'] as $offer) {
+                /*
             // взимаме провайдер по записаното ID от апи-то
             $args = array(
             'meta_query' => array(
@@ -111,99 +113,95 @@ class PageCron extends Controller
             */
 
 
-            // for the moment insert 
-            // check first if offer exists
+                // for the moment insert 
+                // check first if offer exists
 
-            $offer_id = $offer['id'];
-            $service = $this->services[$offer['service']['id']];
-            $title = wp_strip_all_tags($offer['name']);
-            $title_original = $title;
-            $provider = $offer['provider']['id'];
-            $provider_name = $offer['provider']['name'];
-            $provider_logo = $offer['provider']['logo']; // по принцип трябва да взимаме тъмба от провайдера. За момента е линка подаден от апито
-            $description = $offer['description'];
-            $description_original = $description;
-            $call_center_phone = $offer['callCenterPhone'];
-            $call_me_back = ($offer['callMeBack']) ? 1 : 0;
-            $is_active = ($offer['isActive']) ? 1 : 0;
-            $show_on_provider = ($offer['showOnProviderDetails']) ? 1 : 0;
-            $price = '';
-            if(isset($offer['electricityPrice'])) { 
-                $price = $offer['electricityPrice'];
-            }
-            else if(isset($offer['gasPrices'])) { 
-                $price = $offer['gasPrices'];
-            }
-            else if(isset($offer['telecomPrice'])) { 
-                $price = $offer['telecomPrice'];
-            }
-            else if(isset($offer['price'])) { 
-                $price = $offer['price'];
-            }
-            $is_monthly = ($offer['isMonthly']) ? 1 : 0;
-            $valid_from = $offer['validFrom'] ?? null;
-            $valid_to = $offer['validTo'] ?? null;
+                $offer_id = $offer['id'];
+                $service = $this->services[$offer['service']['id']];
+                $title = wp_strip_all_tags($offer['name']);
+                $title_original = $title;
+                $provider = $offer['provider']['id'];
+                $provider_name = $offer['provider']['name'];
+                $provider_logo = $offer['provider']['logo']; // по принцип трябва да взимаме тъмба от провайдера. За момента е линка подаден от апито
+                $description = $offer['description'];
+                $description_original = $description;
+                $call_center_phone = $offer['callCenterPhone'];
+                $call_me_back = ($offer['callMeBack']) ? 1 : 0;
+                $is_active = ($offer['isActive']) ? 1 : 0;
+                $show_on_provider = ($offer['showOnProviderDetails']) ? 1 : 0;
+                $price = '';
+                if (isset($offer['electricityPrice'])) {
+                    $price = $offer['electricityPrice'];
+                } else if (isset($offer['gasPrices'])) {
+                    $price = $offer['gasPrices'];
+                } else if (isset($offer['telecomPrice'])) {
+                    $price = $offer['telecomPrice'];
+                } else if (isset($offer['price'])) {
+                    $price = $offer['price'];
+                }
+                $is_monthly = ($offer['isMonthly']) ? 1 : 0;
+                $valid_from = $offer['validFrom'] ?? null;
+                $valid_to = $offer['validTo'] ?? null;
 
-            $features = '';
-            $pictograms = '';
+                $features = '';
+                $pictograms = '';
 
-            $features = [];
-            $features_original = [];
-            foreach ($offer['features'] as $key => $feature) {
-                $filter_id = '';
-                $filter_text = '';
-                foreach ($feature as $k => $serviceFeature) {
-                    if ($k == 'id') {
-                        $filter_id = $serviceFeature;
-                    }
-                    else if ($k == 'text') {
-                        $filter_text = $serviceFeature;
-                    } else if ($k == 'pictogram') {
-                        if ($serviceFeature) {
-                            $pictograms .= "<div class='offer-pictogram'><img src='$serviceFeature[image]'>$serviceFeature[content]</div>";
+                $features = [];
+                $features_original = [];
+                foreach ($offer['features'] as $key => $feature) {
+                    $filter_id = '';
+                    $filter_text = '';
+                    foreach ($feature as $k => $serviceFeature) {
+                        if ($k == 'id') {
+                            $filter_id = $serviceFeature;
+                        } else if ($k == 'text') {
+                            $filter_text = $serviceFeature;
+                        } else if ($k == 'pictogram') {
+                            if ($serviceFeature) {
+                                $pictograms .= "<div class='offer-pictogram'><img src='$serviceFeature[image]'>$serviceFeature[content]</div>";
+                            }
                         }
                     }
+                    //repeater
+                    $features[] = [
+                        'field_5f3bcf92e0aa6' => $filter_id,
+                        'field_5f3bcffe2cd78' => $filter_text,
+                    ];
+                    $features_original[] = [
+                        'field_5f3bd6bfd00de' => $filter_id,
+                        'field_5f3bd6bfd00df' => $filter_text,
+                    ];
                 }
-                $features[] = [
-                    'field_5f3bcf92e0aa6' => $filter_id,
-                    'field_5f3bcffe2cd78' => $filter_text,
-                ];
-                $features_original[] = [
-                    'field_5f3bd6bfd00de' => $filter_id,
-                    'field_5f3bd6bfd00df' => $filter_text,
-                ];
-            }
-            $pictograms_original = $pictograms;
+                $pictograms_original = $pictograms;
 
 
-            $newOffer = array(
-                'post_title'    => $title,
-                'post_type'     => 'offer',
-                'post_status'   => 'publish',
-            );
+                $newOffer = array(
+                    'post_title'    => $title,
+                    'post_type'     => 'offer',
+                    'post_status'   => 'publish',
+                );
 
-            if(isset($posts_for_update[$offer_id])) {
-                $postArr = [
-                    'ID' => $posts_for_update[$offer_id],
-                    'post_title' => $title,
-                ];
-                
-                echo 'updatе ' . var_dump($offer_id);
-                $post_id = wp_update_post( $postArr );
-                // echo 'updated ' . var_dump($post_id);
-            }
-            else {
-                // Insert the post into the database
-                $post_id = wp_insert_post($newOffer);
-                var_dump($post_id);
-                
-            }
+                if (isset($posts_for_update[$offer_id])) {
+                    $postArr = [
+                        'ID' => $posts_for_update[$offer_id],
+                        'post_title' => $title,
+                    ];
 
-            // when we have update the date is rewrited with the original content
-            foreach ($acf as $field_key => $value) {
-                update_field($field_key, $$value, $post_id);
+                    echo 'updatе ' . var_dump($offer_id);
+                    $post_id = wp_update_post($postArr);
+                    // echo 'updated ' . var_dump($post_id);
+                } else {
+                    // Insert the post into the database
+                    $post_id = wp_insert_post($newOffer);
+                    var_dump($post_id);
+                }
+
+                // when we have update the date is rewrited with the original content
+                foreach ($acf as $field_key => $value) {
+                    update_field($field_key, $$value, $post_id);
+                }
             }
-        }
+        } while (!$offers['isLastPage']);
 
         // update the cron page with new time (post_modified = lastSyncAt)
         $mysql_time_format = "Y-m-d H:i:s";
@@ -245,7 +243,7 @@ class PageCron extends Controller
         }
     }
 
-    public function getOffers($service = null, $time = null)
+    public function getOffers($service = null, $time = null, $page = 1)
     {
         // demo data
         // electricite
@@ -261,7 +259,7 @@ class PageCron extends Controller
         if ($this->bearer === null) {
             $this->api_login();
         }
-        $uri = "wordpress/$service/offers?page=1&limit=10&lastSyncAt=$time";
+        $uri = "wordpress/$service/offers?page=$page&limit=10&lastSyncAt=$time";
         $options  = [
             'headers'        => [
                 'Authorization' => $this->bearer,

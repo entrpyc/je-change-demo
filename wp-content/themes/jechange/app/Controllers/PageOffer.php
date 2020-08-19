@@ -38,6 +38,7 @@ class PageOffer extends Controller
             'order' => 'asc',
             'meta_key' => 'price'
         ];
+        //todo filter by valid from and valid to
         $query = new \WP_Query($args);
         $posts = $query->posts;
 

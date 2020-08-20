@@ -1,14 +1,52 @@
 <?php
 
-namespace App\Controllers;
+namespace App;
 
-use Sober\Controller\Controller;
-
-class PageCron extends Controller
+class SyncOffers
 {
     public function __construct()
     {
+        $this->lastSyncFile = wp_get_upload_dir()['basedir'] . '/sync_offers_time.php';
+        $this->file = wp_get_upload_dir()['basedir'] . '/cron_log.txt';
+        try {
+            file_put_contents($this->file, "\nStart - " . date('d.m.Y H:i:s') . PHP_EOL, FILE_APPEND);
+            $start = microtime(true);
+            $this->sync();
+            $time_elapsed_secs = microtime(true) - $start;
+            file_put_contents($this->file, 'FINISHED FOR ' . $time_elapsed_secs . ' DATE:' . date('d.m.Y H:i:s'), FILE_APPEND);
+        } catch (\Exception $e) {
+            $log = 'Caught exception: ' .  $e->getMessage() . "\n";
+            file_put_contents($this->file, 'error', FILE_APPEND);
+            file_put_contents($this->file, $log . '  DATE:' . date('d.m.Y H:i:s'), FILE_APPEND);
+        }
     }
+
+    public function sync()
+    {
+        $services = [
+            'electricite',
+            'mobile', 
+            // 'internet'
+        ];
+        // използвам файл, защото по този начин решавам въпроса с обновяването няколко пъти на ден 
+        $lastSyncTime = require_once $this->lastSyncFile; // return unix timestamp
+        foreach ($services as $service) {
+            $this->data($service, $lastSyncTime);
+        }
+
+        $this->updateTimeFile();
+    }
+
+    public function updateTimeFile()
+    {
+        $file = wp_get_upload_dir()['basedir'] . '/sync_offers_time.php';
+        $time = time();
+        $date = date('d.m.Y H:i:s', $time);
+        $content = "<?php return $time; // last sync $date ";
+        file_put_contents($file, $content);
+    }
+
+
 
     private $services = [
         1 => 28, //animaux
@@ -29,15 +67,9 @@ class PageCron extends Controller
     ];
 
 
-    public function data()
+    public function data($service_slug, $lastSyncTime)
     {
-        global $post;
         global $wpdb;
-        if (!$post) {
-            throw new \Exception('no post');
-        }
-        $api_id = $post->ID;
-
         /**
          * acf fields
          */
@@ -64,11 +96,10 @@ class PageCron extends Controller
         $acf['field_5f3b86e4b28d9'] = 'valid_from';
         $acf['field_5f3b86fcb28da'] = 'valid_to';
 
-        $time = strtotime($post->post_modified);
-        $time = 0; // for delete 
         $page = 1; // api results
+        $log = "\nservice: $service_slug - last sync: " . date('d.m.Y H:i:s', $lastSyncTime) . " \n";
         do {
-            $offers = $this->getOffers($post->post_content, $time, $page);
+            $offers = $this->getOffers($service_slug, $lastSyncTime, $page);
             $page++; // next page
             if (!$offers) {
                 return [];
@@ -175,45 +206,38 @@ class PageCron extends Controller
                 $pictograms_original = $pictograms;
 
 
-                $newOffer = array(
-                    'post_title'    => $title,
-                    'post_type'     => 'offer',
-                    'post_status'   => 'publish',
-                );
 
                 if (isset($posts_for_update[$offer_id])) {
                     $postArr = [
                         'ID' => $posts_for_update[$offer_id],
-                        'post_title' => $title,
+                        // 'post_title' => $title,
                     ];
                     $post_id = wp_update_post($postArr);
+                    $log .= "updated $post_id $title\n";
                     foreach ($acf as $field_key => $value) {
                         // update only original content
-                        if(key_exists($field_key . '_original', $acf)) {
+                        if (key_exists($field_key . '_original', $acf)) {
                             continue;
                         }
                         update_field($field_key, $$value, $post_id);
                     }
                 } else {
                     // Insert the post into the database
+                    $newOffer = array(
+                        'post_title'    => $title,
+                        'post_type'     => 'offer',
+                        'post_status'   => 'publish',
+                    );
                     $post_id = wp_insert_post($newOffer);
+                    $log .= "new offer $post_id $title\n";
                     foreach ($acf as $field_key => $value) {
                         update_field($field_key, $$value, $post_id);
                     }
                 }
-
             }
         } while (!$offers['isLastPage']);
-
-        // update the cron page with new time (post_modified = lastSyncAt)
-        $mysql_time_format = "Y-m-d H:i:s";
-
-        $post_modified = gmdate($mysql_time_format);
-        $post_modified_gmt = gmdate($mysql_time_format, (time() + get_option('gmt_offset') * HOUR_IN_SECONDS));
-
-        $post_id = $api_id;
-        $update_time = $wpdb->query("UPDATE $wpdb->posts SET post_modified = '{$post_modified}', post_modified_gmt = '{$post_modified_gmt}'  WHERE ID = {$post_id}");
-        return [];
+        
+        file_put_contents($this->file, $log, FILE_APPEND);
     }
 
     const api = 'https://jechange.sn77.net/api/v1/';

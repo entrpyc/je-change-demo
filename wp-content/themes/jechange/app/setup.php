@@ -130,3 +130,7 @@ add_action('after_setup_theme', function () {
         return "<?= " . __NAMESPACE__ . "\\asset_path({$asset}); ?>";
     });
 });
+
+add_action('sync_offers', function () {
+    new SyncOffers();
+});

@@ -29,7 +29,10 @@ class SyncOffers
             // 'internet'
         ];
         // използвам файл, защото по този начин решавам въпроса с обновяването няколко пъти на ден 
-        $lastSyncTime = require_once $this->lastSyncFile; // return unix timestamp
+        $lastSyncTime = 0;
+        if(file_exists($this->lastSyncFile)){
+            $lastSyncTime = include_once $this->lastSyncFile; // return unix timestamp
+        }
         foreach ($services as $service) {
             $this->data($service, $lastSyncTime);
         }

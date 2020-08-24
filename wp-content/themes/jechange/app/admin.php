@@ -340,3 +340,20 @@ add_filter('page_row_actions', function ($actions) {
     unset($actions['inline hide-if-no-js']);
     return $actions;
 });
+
+
+/**
+ * ACF Read only some fields, coming from the API
+ * Note: Multiple Filters
+ */
+add_filters([
+    'acf/load_field/key=field_5f3a3e183cf26', // provider_id
+    'acf/load_field/key=field_5f43b5d9aae41', // provider_name_original
+    'acf/load_field/key=field_5f43a68bbc6d6', // provider_logo_original
+    'acf/load_field/key=field_5f43a64fbc6d4', // provider_description_original
+    'acf/load_field/key=field_5f43a670bc6d5'] // provider_short_description_original
+
+                                            , function ($field) {
+    $field['readonly'] = 1;
+    return $field;
+});

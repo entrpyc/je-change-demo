@@ -136,3 +136,41 @@ function display_sidebar()
     isset($display) || $display = apply_filters('sage/display_sidebar', false);
     return $display;
 }
+
+
+/**
+ * Pass multiple filters to a callback.
+ *
+ * @param  mixed   $filters
+ * @param  mixed   $callback
+ * @param  integer $priority
+ * @param  integer $arguments
+ * @return true
+ */
+function add_filters($filters, $callback, $priority = 10, $arguments = 1)
+{
+    collect($filters)->each(function ($filter, $index) use ($callback, $priority, $arguments) {
+        add_filter(
+            $filter,
+            $callback,
+            (int)is_array($priority) ? $priority[$index] : $priority,
+            (int)is_array($arguments) ? $arguments[$index] : $arguments
+        );
+    });
+
+    return true;
+}
+
+/**
+ * Pass multiple actions to a callback.
+ *
+ * @param  mixed   $actions
+ * @param  mixed   $callback
+ * @param  integer $priority
+ * @param  integer $arguments
+ * @return true
+ */
+function add_actions($actions, $callback, $priority = 10, $arguments = 1)
+{
+    return add_filters($actions, $callback, $priority, $arguments);
+}

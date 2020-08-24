@@ -4,6 +4,9 @@ namespace App;
 
 class SyncOffers
 {
+    protected $lastSyncFile;
+    protected $file;
+
     public function __construct()
     {
         $this->lastSyncFile = wp_get_upload_dir()['basedir'] . '/sync_offers_time.php';
@@ -23,18 +26,24 @@ class SyncOffers
 
     public function sync()
     {
+        $this->syncProviders(0);
+
+        // TODO Sync Offers AND CONNECT THEM WITH THE PROVIDERS
+        return;
+
+
         $services = [
             'electricite',
             'mobile', 
             // 'internet'
         ];
-        // използвам файл, защото по този начин решавам въпроса с обновяването няколко пъти на ден 
+        // using file to solve the problem with syncing several times per day // TODO To be discussed
         $lastSyncTime = 0;
         if(file_exists($this->lastSyncFile)){
             $lastSyncTime = include_once $this->lastSyncFile; // return unix timestamp
         }
         foreach ($services as $service) {
-            $this->data($service, $lastSyncTime);
+            $this->syncOffers($service, $lastSyncTime);
         }
 
         $this->updateTimeFile();
@@ -70,7 +79,7 @@ class SyncOffers
     ];
 
 
-    public function data($service_slug, $lastSyncTime)
+    private function syncOffers($service_slug, $lastSyncTime)
     {
         global $wpdb;
         /**
@@ -109,7 +118,7 @@ class SyncOffers
             }
 
             $offers_ids = []; // check if already exists
-            $posts_for_update = []; // post for update
+            $posts_for_update = []; // posts for update
             foreach ($offers['data'] as $offer) {
                 $offers_ids[] = $offer['id'];
             }
@@ -133,7 +142,8 @@ class SyncOffers
 
             foreach ($offers['data'] as $offer) {
                 /*
-                // взимаме провайдер по записаното ID от апи-то
+                 * //TODO
+                // we get provider based on provider api ID
                 $args = array(
                 'meta_query' => array(
                     array(
@@ -147,7 +157,7 @@ class SyncOffers
                 */
 
 
-                // for the moment insert 
+                // before insert
                 // check first if offer exists
 
                 $offer_id = $offer['id'];
@@ -156,7 +166,7 @@ class SyncOffers
                 $title_original = $title;
                 $provider = $offer['provider']['id'];
                 $provider_name = $offer['provider']['name'];
-                $provider_logo = $offer['provider']['logo']; // по принцип трябва да взимаме тъмба от провайдера. За момента е линка подаден от апито
+                $provider_logo = $offer['provider']['logo']; // we should get the provider thumb... for the moment only the link is passed from the API // TODO
                 $description = $offer['description'];
                 $description_original = $description;
                 $call_center_phone = $offer['callCenterPhone'];
@@ -243,6 +253,117 @@ class SyncOffers
         file_put_contents($this->file, $log, FILE_APPEND);
     }
 
+    /**
+     * Sync Providers from API
+     * @param $lastSyncTime
+     */
+    private function syncProviders($lastSyncTime)
+    {
+        /**
+         * acf fields
+         */
+        $acf = [];
+        $acf['field_5f3a3e183cf26'] = 'provider_id';
+        $acf['field_5f43b5d9aae41'] = 'provider_name_original';
+        $acf['field_5f43a607bc6d1'] = 'provider_logo';
+        $acf['field_5f43a68bbc6d6'] = 'provider_logo_original';
+        $acf['field_5f43a625bc6d2'] = 'provider_description';
+        $acf['field_5f43a64fbc6d4'] = 'provider_description_original';
+        $acf['field_5f43a63fbc6d3'] = 'provider_short_description';
+        $acf['field_5f43a670bc6d5'] = 'provider_short_description_original';
+
+
+        $page = 1; // api results
+        $log = "\n - last sync: " . date('d.m.Y H:i:s', $lastSyncTime) . " \n";
+        do {
+            $providers = $this->getProviders($lastSyncTime, $page);
+            $page++; // next page
+            if (!$providers) {
+                return [];
+            }
+
+            $providers_ids = []; // check if already exists in wp
+            $posts_for_update = []; // posts for update
+            foreach ($providers['data'] as $provider) {
+                $providers_ids[] = $provider['id'];
+            }
+            // get existing posts
+            $args = array(
+                'post_type' => 'providers',
+                'meta_query' => array(
+                    array(
+                        'key' => 'provider_id', // provider_id
+                        'value' => implode(',', $providers_ids),
+                        'compare' => 'in',
+                    )
+                )
+            );
+            $query = new \WP_Query($args);
+
+            // mark which offer ids are for update
+            foreach ($query->posts as $k => $post) {
+                $posts_for_update[get_post_meta($post->ID, 'provider_id')[0]] = $post->ID;
+            }
+
+            foreach ($providers['data'] as $provider) {
+
+                $provider_id = $provider['id'];
+                $provider_slug = $provider['slug'];
+                $provider_name_original = $provider['name'];
+                $provider_description = $provider['description'];
+                $provider_description_original = $provider['description'];
+                $provider_short_description = $provider['short_description'];
+                $provider_short_description_original = $provider['short_description'];
+                $provider_api_logo_href = $provider['logo'];
+                $image_id = $this->uploadImage($provider_api_logo_href) ?? 0; // upload logo, return false if already in uploads
+                $provider_logo = $image_id;
+                $provider_logo_original = $image_id;
+
+                $providers_ids[] = $provider['id'];
+
+                if (isset($posts_for_update[$provider['id']])) {
+
+                    $postArr = [
+                        'ID' => $posts_for_update[$provider['id']],
+                        // 'post_title' => $title,
+                    ];
+                    $post_id = wp_update_post($postArr);
+                    $log .= "updated $post_id $provider_name\n";
+                    foreach ($acf as $field_key => $value) {
+                        // update only original content
+                        if (key_exists($field_key . '_original', $acf)) {
+                            continue;
+                        }
+                        if($$value !== 0) {
+                            update_field($field_key, $$value, $post_id);
+                        }
+                    }
+                } else {
+                    // Insert the post into the database
+                    $newProvider = array(
+                        'post_title'    => $provider_name,
+                        'post_type'     => 'providers',
+                        'post_status'   => 'publish',
+                    );
+                    $post_id = wp_insert_post($newProvider);
+
+
+                    $log .= "new provider $post_id $provider_name\n";
+                    foreach ($acf as $field_key => $value) {
+                        if($$value !== 0) {
+                            update_field($field_key, $$value, $post_id);
+                        }
+                    }
+                }
+            }
+
+
+
+        } while (!$providers['isLastPage']);
+
+        file_put_contents($this->file, $log, FILE_APPEND);
+    }
+
     const api = 'https://jechange.sn77.net/api/v1/';
     private $bearer = null;
     public function api_login()
@@ -306,5 +427,73 @@ class SyncOffers
             echo '<pre>', var_dump($e), '</pre>';
             exit();
         }
+    }
+
+    public function getProviders($time = null, $page = 1)
+    {
+
+        if ($this->bearer === null) {
+            $this->api_login();
+        }
+        $uri = "providers?page=$page&limit=50&lastSyncAt=$time";
+        $options  = [
+            'headers'        => [
+                'Authorization' => $this->bearer,
+            ],
+        ];
+        try {
+            $client = new \GuzzleHttp\Client();
+            $response = $client->request('get', self::api . $uri, $options);
+            if ($response->getStatusCode() == 200) {
+                $js = json_decode($response->getBody(), 1); // json
+                return $js;
+            }
+        } catch (\Exception $e) {
+            echo '<pre>', var_dump($e), '</pre>';
+            exit();
+        }
+    }
+
+    /**
+     * Upload Image From URL and return image_id
+     * @param $image_url  string
+     * @return string|\WP_Error
+     */
+    private function uploadImage( $image_url )
+    {
+        $upload_dir = wp_upload_dir();
+        $image_data = @file_get_contents( $image_url );
+
+        $path = explode('.',$image_url);
+        $extension = end($path);
+
+        $filename = basename( $image_url );
+
+        if ( wp_mkdir_p( $upload_dir['path'] ) ) {
+            $file = $upload_dir['path'] . '/' . $filename;
+        }
+        else {
+            $file = $upload_dir['basedir'] . '/' . $filename;
+        }
+
+        // If file exists in uploads do not upload again
+        if (file_exists($file)) {
+            return false;
+        }
+
+        file_put_contents( $file, $image_data );
+        $attachment = array(
+            'post_mime_type' => 'image/' . $extension,
+            'post_title' => sanitize_file_name( $filename ),
+            'post_content' => '',
+            'post_status' => 'inherit'
+        );
+
+        $image_id = wp_insert_attachment( $attachment, $file );
+        require_once( ABSPATH . 'wp-admin/includes/image.php' );
+        $attach_data = wp_generate_attachment_metadata( $image_id, $file );
+        wp_update_attachment_metadata( $image_id, $attach_data );
+
+        return $image_id ?? false;
     }
 }

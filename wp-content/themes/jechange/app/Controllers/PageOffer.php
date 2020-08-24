@@ -12,6 +12,8 @@ class PageOffer extends Controller
 
     public function data()
     {
+        //do_action('sync_offers');
+
         global $post;
         global $wp;
 
@@ -58,11 +60,11 @@ class PageOffer extends Controller
 
             $noTv = true; // offer don't include tv service
             $noGrn = true; // offer don't include green energy
-            $forfaitlimite = true; // is limited offer - for mobile 
+            $forfaitlimite = true; // is limited offer - for mobile
 
             foreach ($features as $feature) {
                 // internet
-                // filter Débits 
+                // filter Débits
                 if ($debit) {
                     if ($feature['filter_id'] == 'NET') {
                         $filter = explode(':', $feature['filter_text']);
@@ -82,9 +84,9 @@ class PageOffer extends Controller
                         }
                     }
                 }
-                // /filter Débits 
+                // /filter Débits
 
-                // filter Dégroupage 
+                // filter Dégroupage
                 if ($typeDeLigne) {
                     if ($feature['filter_id'] == 'LIN') {
                         if ($typeDeLigne == 1) {
@@ -100,7 +102,7 @@ class PageOffer extends Controller
                         }
                     }
                 }
-                // /filter Dégroupage 
+                // /filter Dégroupage
 
                 // filter tv
                 if ($feature['filter_id'] == 'TVCHAN') {

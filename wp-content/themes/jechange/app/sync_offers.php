@@ -3,13 +3,15 @@
 namespace App;
 
 use GuzzleHttp\Exception\GuzzleException;
+use WP_Query;
 
 class SyncOffers
 {
     const API_URL = 'https://jechange.sn77.net/api/v1/';
     private $bearer = null;
+
     private $lastSyncFile;
-    private $file;
+    private $cronLogFile;
 
     /**
      * Mapping of Service Types between API and WP
@@ -43,6 +45,7 @@ class SyncOffers
      * @var array
      */
     const ACF_PROVIDER_FIELDS = [
+        'field_5f323c00dd861' => 'service_type',
         'field_5f3a3e183cf26' => 'provider_id',
         'field_5f43b5d9aae41' => 'provider_name_original',
         'field_5f43a607bc6d1' => 'provider_logo',
@@ -60,9 +63,7 @@ class SyncOffers
     const ACF_OFFER_FIELDS = [
         'field_5f3a67c541538' => 'offer_id',
         'field_5f3643a52befc' => 'service',
-        'field_5f3643f82befd' => 'provider',
-        'field_5f369724269d1' => 'provider_logo',
-        'field_5f3a637ead988' => 'provider_name',
+        'field_5f4512ecb8497' => 'provider_id', // ACF Provider API ID Custom Field
         'field_5f3695d05d79a' => 'title',
         'field_5f36961e5d79b' => 'title_original',
         'field_5f3696505d79c' => 'description',
@@ -81,26 +82,33 @@ class SyncOffers
         'field_5f3b86fcb28da' => 'valid_to',
     ];
 
+    /**
+     * ACF Service Type Custom Field
+     * Used in the Provider permalink creation on insert/update
+     * @var string
+     */
+    const ACF_SERVICE_TYPE_FIELD = 'field_5f323c00dd861';
+
+
     public function __construct()
     {
         $this->lastSyncFile = wp_get_upload_dir()['basedir'] . '/sync_offers_time.php';
-        $this->file = wp_get_upload_dir()['basedir'] . '/cron_log.txt';
+        $this->cronLogFile = wp_get_upload_dir()['basedir'] . '/cron_log.txt';
         try {
-            file_put_contents($this->file, "\nStart - " . date('d.m.Y H:i:s') . PHP_EOL, FILE_APPEND);
+            file_put_contents($this->cronLogFile, "\nStart - " . date('d.m.Y H:i:s') . PHP_EOL, FILE_APPEND);
             $start = microtime(true);
             $this->sync();
             $time_elapsed_secs = microtime(true) - $start;
-            file_put_contents($this->file, 'FINISHED FOR ' . $time_elapsed_secs . ' DATE:' . date('d.m.Y H:i:s'), FILE_APPEND);
+            file_put_contents($this->cronLogFile, 'FINISHED FOR ' . $time_elapsed_secs . ' DATE:' . date('d.m.Y H:i:s'), FILE_APPEND);
         } catch (\Exception $e) {
             $log = 'Caught exception: ' .  $e->getMessage() . "\n";
-            file_put_contents($this->file, 'error', FILE_APPEND);
-            file_put_contents($this->file, $log . '  DATE:' . date('d.m.Y H:i:s'), FILE_APPEND);
+            file_put_contents($this->cronLogFile, 'error', FILE_APPEND);
+            file_put_contents($this->cronLogFile, $log . '  DATE:' . date('d.m.Y H:i:s'), FILE_APPEND);
         }
     }
 
     public function sync()
     {
-        // TODO Link Providers to Service Type ACF to be able to get the right slug
         // TODO Sync Offers AND CONNECT THEM WITH THE PROVIDERS
 
         // Using file to solve the problem with syncing several times per day // TODO To be discussed
@@ -108,18 +116,17 @@ class SyncOffers
         if(file_exists($this->lastSyncFile)){
             $lastSyncTime = include_once $this->lastSyncFile; // return unix timestamp
         }
-
         // Sync Providers
-        $this->syncProviders(0);
+        $this->syncProviders($lastSyncTime);
 
         // Sync Offers
         $services = [
             'electricite',
             'mobile',
-            // 'internet'
+            'internet'
         ];
         foreach ($services as $service) {
-            $this->syncOffers($service, $lastSyncTime);
+            $this->syncOffers($service, 0);
         }
 
         // Update last sync time file
@@ -132,11 +139,10 @@ class SyncOffers
      */
     private function updateTimeFile()
     {
-        $file = wp_get_upload_dir()['basedir'] . '/sync_offers_time.php';
         $time = time();
         $date = date('d.m.Y H:i:s', $time);
         $content = "<?php return $time; // last sync $date ";
-        file_put_contents($file, $content);
+        file_put_contents($this->lastSyncFile, $content);
     }
 
     /**
@@ -156,6 +162,7 @@ class SyncOffers
         // do get offers from api until lastPage
         do {
             $offers = $this->getOffers($service_slug, $lastSyncTime, $page);
+
             $page++; // next page
             if (!$offers) {
                 return false;
@@ -171,7 +178,7 @@ class SyncOffers
                 'post_type' => 'offer',
                 'meta_query' => array(
                     array(
-                        'key' => 'offer_id', // provider_id
+                        'key' => 'offer_id',
                         'value' => implode(',', $offers_ids),
                         'compare' => 'in',
                     )
@@ -185,29 +192,26 @@ class SyncOffers
             }
 
             foreach ($offers['data'] as $offer) {
-                /*
-                 * //TODO Provider
-                // we get provider based on provider api ID
+
+                // we get provider based on provider api ID custom field
                 $args = array(
-                'meta_query' => array(
-                    array(
-                        'key' => 'field_5f3a3e183cf26', // provider_id
-                        'value' => $offer['provider']['id'],
-                        'compare' => '=',
+                    'post_type' => 'providers',
+                    'meta_query' => array(
+                        array(
+                            'key' => 'provider_id',
+                            'value' => $offer['provider']['id'],
+                            'compare' => '=',
+                        )
                     )
-                )
                 );
                 $query = new WP_Query($args);
-                */
 
 
                 $offer_id = $offer['id'];
                 $service = self::MAP_SERVICES[$offer['service']['id']];
+                $provider_id = $query->posts[0] ?? 0; // get based on the query first result
                 $title = wp_strip_all_tags($offer['name']);
                 $title_original = $title;
-                $provider = $offer['provider']['id'];
-                $provider_name = $offer['provider']['name'];
-                $provider_logo = $offer['provider']['logo']; // we should get the provider thumb... for the moment only the link is passed from the API // TODO image in uploads
                 $description = $offer['description'];
                 $description_original = $description;
                 $call_center_phone = $offer['callCenterPhone'];
@@ -242,8 +246,11 @@ class SyncOffers
                         } else if ($k == 'text') {
                             $filter_text = $serviceFeature;
                         } else if ($k == 'pictogram') {
+                            $pictogram_image_url = $serviceFeature['image']['url'];
+                            // $image_id = $this->uploadImage($pictogram_image_url) ?? 0; // upload pictogram, return false if already in uploads
+                            // TODO save pictogram to WP
                             if ($serviceFeature) {
-                                $pictograms .= "<div class='offer-pictogram'><img src='$serviceFeature[image]'>$serviceFeature[content]</div>";
+                                $pictograms .= "<div class='offer-pictogram'><img src='$pictogram_image_url'>$pictogram_image_url</div>";
                             }
                         }
                     }
@@ -289,7 +296,7 @@ class SyncOffers
             }
         } while (!$offers['isLastPage']);
         
-        file_put_contents($this->file, $log, FILE_APPEND);
+        file_put_contents($this->cronLogFile, $log, FILE_APPEND);
 
         return true;
     }
@@ -348,17 +355,25 @@ class SyncOffers
                 $provider_description_original = $provider['description'];
                 $provider_short_description = $provider['short_description'];
                 $provider_short_description_original = $provider['short_description'];
-                $provider_api_logo_href = $provider['logo'];
+                $provider_api_logo_href = $provider['logo']['url'];
                 $image_id = $this->uploadImage($provider_api_logo_href) ?? 0; // upload logo, return false if already in uploads
                 $provider_logo = $image_id;
                 $provider_logo_original = $image_id;
+
+                // get service type from the first provider service, then get corresponding service type object in wp
+                // we need the service type to be able to create the permalink of the provider
+                $serviceTypeWpId = self::MAP_SERVICE_TYPES[$providers['data'][0]['services'][0]['serviceType']['id']] ?? self::MAP_SERVICE_TYPES[1]; // just for protection
+
+                $service_type = $serviceTypeWpId; // pass to update_field $$value
 
                 $providers_ids[] = $provider['id'];
 
                 if (isset($posts_for_update[$provider['id']])) {
                     $postArr = [
                         'ID' => $posts_for_update[$provider['id']],
-                        // 'post_title' => $title,
+                        'acf' => [
+                            self::ACF_SERVICE_TYPE_FIELD => $serviceTypeWpId  // pass serviceType acf field to wp_insert_post_data to abe able to create the slug
+                        ]
                     ];
                     $post_id = wp_update_post($postArr);
                     $log .= "[Update] $post_id $provider_name_original\n";
@@ -377,8 +392,14 @@ class SyncOffers
                         'post_title'    => $provider_name_original,
                         'post_type'     => 'providers',
                         'post_status'   => 'publish',
+                        'acf' => [
+                            self::ACF_SERVICE_TYPE_FIELD => $serviceTypeWpId  // pass serviceType acf field to wp_insert_post_data to abe able to create the slug
+                        ],
+                        'sync' => true  // important for wp_insert_post_data filter to be able to create the slug
                     );
+                    $newProvider = apply_filters( 'wp_insert_post_data', $newProvider, $newProvider ); // call our modified hook in admin.php to return the right slug in the data
                     $post_id = wp_insert_post($newProvider);
+
                     $log .= "[Insert] provider $post_id $provider_name_original\n";
                     foreach (self::ACF_PROVIDER_FIELDS as $field_key => $value) {
                         if($$value !== 0) { // if image_id is not 0
@@ -389,7 +410,7 @@ class SyncOffers
             }
         } while (!$providers['isLastPage']);
 
-        file_put_contents($this->file, $log, FILE_APPEND);
+        file_put_contents($this->cronLogFile, $log, FILE_APPEND);
 
         return true;
     }
@@ -520,6 +541,10 @@ class SyncOffers
     {
         $upload_dir = wp_upload_dir();
         $image_data = @file_get_contents( $image_url );
+
+        if(!$image_data){
+            return false;
+        }
 
         $path = explode('.',$image_url);
         $extension = end($path);

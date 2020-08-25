@@ -99,10 +99,13 @@ add_filter( 'wp_update_term_data', function( $data, $term_id, $taxonomy, $args )
  */
 add_filter('wp_insert_post_data', function ($data, $postArr) {
 
-    //return data if still there is no post id set
-    if (!$postArr['ID']) {
+    //at this point, if it's a new post, $postArr["ID"] should NOT be set
+    //return the data if this is not cron sync (sync = true coming from SyncOffers class AND it is a new post
+    // TODO double check this if
+    if (!$postArr['ID'] && !$postArr['sync']) {
         return $data;
     }
+
     $mapping = [
         'assurance' => 'assureurs',
         'energie' => 'fournisseurs',
@@ -343,7 +346,7 @@ add_filter('page_row_actions', function ($actions) {
 
 
 /**
- * ACF Read only some fields, coming from the API
+ * ACF Read only (Disable) some fields, coming from the API
  * Note: Multiple Filters
  */
 add_filters([
@@ -352,8 +355,7 @@ add_filters([
     'acf/load_field/key=field_5f43a68bbc6d6', // provider_logo_original
     'acf/load_field/key=field_5f43a64fbc6d4', // provider_description_original
     'acf/load_field/key=field_5f43a670bc6d5'] // provider_short_description_original
-
-                                            , function ($field) {
+    , function ($field) {
     $field['readonly'] = 1;
     return $field;
 });

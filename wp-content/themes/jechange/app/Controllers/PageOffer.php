@@ -12,7 +12,7 @@ class PageOffer extends Controller
 
     public function data()
     {
-        do_action('sync_offers');
+        //do_action('sync_offers');
 
         global $post;
         global $wp;

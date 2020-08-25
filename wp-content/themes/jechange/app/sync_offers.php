@@ -2,10 +2,84 @@
 
 namespace App;
 
+use GuzzleHttp\Exception\GuzzleException;
+
 class SyncOffers
 {
-    protected $lastSyncFile;
-    protected $file;
+    const API_URL = 'https://jechange.sn77.net/api/v1/';
+    private $bearer = null;
+    private $lastSyncFile;
+    private $file;
+
+    /**
+     * Mapping of Service Types between API and WP
+     * @var array
+     */
+    const MAP_SERVICE_TYPES = [
+        1 => 17, //'telecoms',
+        2 => 24, //'assurance',
+        3 => 21, //'energie',
+        4 => 26, //'credits',
+        5 => 25, //'finances',
+    ];
+
+    /**
+     * Mapping of Services between API and WP
+     * @var array
+     */
+    const MAP_SERVICES = [
+        1 => 28, //animaux
+        7 => 27, //auto
+        8 => 41, //bourse
+        2 => 22, //electricite
+        3 => 23, //gaz
+        4 => 35, //duale
+        5 => 20, //internet
+        6 => 36, //mobile
+    ];
+
+    /**
+     * Provider ACF Custom Fields
+     * @var array
+     */
+    const ACF_PROVIDER_FIELDS = [
+        'field_5f3a3e183cf26' => 'provider_id',
+        'field_5f43b5d9aae41' => 'provider_name_original',
+        'field_5f43a607bc6d1' => 'provider_logo',
+        'field_5f43a68bbc6d6' => 'provider_logo_original',
+        'field_5f43a625bc6d2' => 'provider_description',
+        'field_5f43a64fbc6d4' => 'provider_description_original',
+        'field_5f43a63fbc6d3' => 'provider_short_description',
+        'field_5f43a670bc6d5' => 'provider_short_description_original',
+    ];
+
+    /**
+     * Offer ACF Custom Fields
+     * @var array
+     */
+    const ACF_OFFER_FIELDS = [
+        'field_5f3a67c541538' => 'offer_id',
+        'field_5f3643a52befc' => 'service',
+        'field_5f3643f82befd' => 'provider',
+        'field_5f369724269d1' => 'provider_logo',
+        'field_5f3a637ead988' => 'provider_name',
+        'field_5f3695d05d79a' => 'title',
+        'field_5f36961e5d79b' => 'title_original',
+        'field_5f3696505d79c' => 'description',
+        'field_5f36965f5d79d' => 'description_original',
+        'field_5f3bcf11a9cd5' => 'features', // repeater
+        'field_5f3bd6bfd00dd' => 'features_original',
+        'field_5f3a38f503168' => 'pictograms',
+        'field_5f3a391003169' => 'pictograms_original',
+        'field_5f3b7b5243c39' => 'call_center_phone',
+        'field_5f3b7e6b43c3b' => 'call_me_back',
+        'field_5f3b7e9243c3c' => 'is_active',
+        'field_5f3b7eaf43c3d' => 'show_on_provider',
+        'field_5f3b7e3d43c3a' => 'price',
+        'field_5f3b7f1f43c3e' => 'is_monthly',
+        'field_5f3b86e4b28d9' => 'valid_from',
+        'field_5f3b86fcb28da' => 'valid_to',
+    ];
 
     public function __construct()
     {
@@ -26,30 +100,37 @@ class SyncOffers
 
     public function sync()
     {
-        $this->syncProviders(0);
-
+        // TODO Link Providers to Service Type ACF to be able to get the right slug
         // TODO Sync Offers AND CONNECT THEM WITH THE PROVIDERS
-        return;
 
-
-        $services = [
-            'electricite',
-            'mobile', 
-            // 'internet'
-        ];
-        // using file to solve the problem with syncing several times per day // TODO To be discussed
+        // Using file to solve the problem with syncing several times per day // TODO To be discussed
         $lastSyncTime = 0;
         if(file_exists($this->lastSyncFile)){
             $lastSyncTime = include_once $this->lastSyncFile; // return unix timestamp
         }
+
+        // Sync Providers
+        $this->syncProviders(0);
+
+        // Sync Offers
+        $services = [
+            'electricite',
+            'mobile',
+            // 'internet'
+        ];
         foreach ($services as $service) {
             $this->syncOffers($service, $lastSyncTime);
         }
 
+        // Update last sync time file
         $this->updateTimeFile();
     }
 
-    public function updateTimeFile()
+    /**
+     * Keep Last Sync Time in a file
+     * TODO To be discussed
+     */
+    private function updateTimeFile()
     {
         $file = wp_get_upload_dir()['basedir'] . '/sync_offers_time.php';
         $time = time();
@@ -58,63 +139,26 @@ class SyncOffers
         file_put_contents($file, $content);
     }
 
-
-
-    private $services = [
-        1 => 28, //animaux
-        7 => 27, //auto
-        8 => 41, //bourse
-        2 => 22, //electricite
-        3 => 23, //gaz
-        4 => 35, //duale
-        5 => 20, //internet
-        6 => 36, //mobile
-    ];
-    private $serviceTypes = [
-        1 => 17, //'telecoms',
-        2 => 24, //'assurance',
-        3 => 21, //'energie',
-        4 => 26, //'credits',
-        5 => 25, //'finances',
-    ];
-
-
+    /**
+     * Sync Offers from API with Wordpress
+     * Insert or Update Offers
+     * @endpoint GET /api/{version}/wordpress/{serviceSlug}/offers
+     * @param $service_slug
+     * @param $lastSyncTime
+     * @return bool
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     private function syncOffers($service_slug, $lastSyncTime)
     {
-        global $wpdb;
-        /**
-         * acf fields
-         */
-        $acf = [];
-        $acf['field_5f3a67c541538'] = 'offer_id';
-        $acf['field_5f3643a52befc'] = 'service';
-        $acf['field_5f3643f82befd'] = 'provider';
-        $acf['field_5f369724269d1'] = 'provider_logo';
-        $acf['field_5f3a637ead988'] = 'provider_name';
-        $acf['field_5f3695d05d79a'] = 'title';
-        $acf['field_5f36961e5d79b'] = 'title_original';
-        $acf['field_5f3696505d79c'] = 'description';
-        $acf['field_5f36965f5d79d'] = 'description_original';
-        $acf['field_5f3bcf11a9cd5'] = 'features'; // repeater
-        $acf['field_5f3bd6bfd00dd'] = 'features_original';
-        $acf['field_5f3a38f503168'] = 'pictograms';
-        $acf['field_5f3a391003169'] = 'pictograms_original';
-        $acf['field_5f3b7b5243c39'] = 'call_center_phone';
-        $acf['field_5f3b7e6b43c3b'] = 'call_me_back';
-        $acf['field_5f3b7e9243c3c'] = 'is_active';
-        $acf['field_5f3b7eaf43c3d'] = 'show_on_provider';
-        $acf['field_5f3b7e3d43c3a'] = 'price';
-        $acf['field_5f3b7f1f43c3e'] = 'is_monthly';
-        $acf['field_5f3b86e4b28d9'] = 'valid_from';
-        $acf['field_5f3b86fcb28da'] = 'valid_to';
-
         $page = 1; // api results
         $log = "\nservice: $service_slug - last sync: " . date('d.m.Y H:i:s', $lastSyncTime) . " \n";
+
+        // do get offers from api until lastPage
         do {
             $offers = $this->getOffers($service_slug, $lastSyncTime, $page);
             $page++; // next page
             if (!$offers) {
-                return [];
+                return false;
             }
 
             $offers_ids = []; // check if already exists
@@ -122,7 +166,7 @@ class SyncOffers
             foreach ($offers['data'] as $offer) {
                 $offers_ids[] = $offer['id'];
             }
-            // get existing posts
+            // get existing offers
             $args = array(
                 'post_type' => 'offer',
                 'meta_query' => array(
@@ -142,7 +186,7 @@ class SyncOffers
 
             foreach ($offers['data'] as $offer) {
                 /*
-                 * //TODO
+                 * //TODO Provider
                 // we get provider based on provider api ID
                 $args = array(
                 'meta_query' => array(
@@ -157,16 +201,13 @@ class SyncOffers
                 */
 
 
-                // before insert
-                // check first if offer exists
-
                 $offer_id = $offer['id'];
-                $service = $this->services[$offer['service']['id']];
+                $service = self::MAP_SERVICES[$offer['service']['id']];
                 $title = wp_strip_all_tags($offer['name']);
                 $title_original = $title;
                 $provider = $offer['provider']['id'];
                 $provider_name = $offer['provider']['name'];
-                $provider_logo = $offer['provider']['logo']; // we should get the provider thumb... for the moment only the link is passed from the API // TODO
+                $provider_logo = $offer['provider']['logo']; // we should get the provider thumb... for the moment only the link is passed from the API // TODO image in uploads
                 $description = $offer['description'];
                 $description_original = $description;
                 $call_center_phone = $offer['callCenterPhone'];
@@ -218,18 +259,16 @@ class SyncOffers
                 }
                 $pictograms_original = $pictograms;
 
-
-
                 if (isset($posts_for_update[$offer_id])) {
                     $postArr = [
                         'ID' => $posts_for_update[$offer_id],
                         // 'post_title' => $title,
                     ];
                     $post_id = wp_update_post($postArr);
-                    $log .= "updated $post_id $title\n";
-                    foreach ($acf as $field_key => $value) {
+                    $log .= "[Update] $post_id $title\n";
+                    foreach (self::ACF_OFFER_FIELDS as $field_key => $value) {
                         // update only original content
-                        if (key_exists($field_key . '_original', $acf)) {
+                        if (key_exists($field_key . '_original', self::ACF_OFFER_FIELDS)) {
                             continue;
                         }
                         update_field($field_key, $$value, $post_id);
@@ -242,44 +281,39 @@ class SyncOffers
                         'post_status'   => 'publish',
                     );
                     $post_id = wp_insert_post($newOffer);
-                    $log .= "new offer $post_id $title\n";
-                    foreach ($acf as $field_key => $value) {
-                        update_field($field_key, $$value, $post_id);
+                    $log .= "[Insert] Offer $post_id $title\n";
+                    foreach (self::ACF_OFFER_FIELDS as $field_key => $value) {
+                        update_field($field_key, $$value, $post_id); // &&value example: using vars like $pictograms_original
                     }
                 }
             }
         } while (!$offers['isLastPage']);
         
         file_put_contents($this->file, $log, FILE_APPEND);
+
+        return true;
     }
 
     /**
-     * Sync Providers from API
+     * Sync Providers from API with Wordpress
+     * Insert or Update Providers
+     * @endpoint GET /api/{version}/providers
      * @param $lastSyncTime
+     * @return bool
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     private function syncProviders($lastSyncTime)
     {
-        /**
-         * acf fields
-         */
-        $acf = [];
-        $acf['field_5f3a3e183cf26'] = 'provider_id';
-        $acf['field_5f43b5d9aae41'] = 'provider_name_original';
-        $acf['field_5f43a607bc6d1'] = 'provider_logo';
-        $acf['field_5f43a68bbc6d6'] = 'provider_logo_original';
-        $acf['field_5f43a625bc6d2'] = 'provider_description';
-        $acf['field_5f43a64fbc6d4'] = 'provider_description_original';
-        $acf['field_5f43a63fbc6d3'] = 'provider_short_description';
-        $acf['field_5f43a670bc6d5'] = 'provider_short_description_original';
-
-
         $page = 1; // api results
-        $log = "\n - last sync: " . date('d.m.Y H:i:s', $lastSyncTime) . " \n";
+        $log = "\n ---- PROVIDERS ---- last sync: " . date('d.m.Y H:i:s', $lastSyncTime) . " \n";
+
+        // do get providers from api until lastPage
         do {
             $providers = $this->getProviders($lastSyncTime, $page);
+
             $page++; // next page
             if (!$providers) {
-                return [];
+                return false;
             }
 
             $providers_ids = []; // check if already exists in wp
@@ -322,16 +356,15 @@ class SyncOffers
                 $providers_ids[] = $provider['id'];
 
                 if (isset($posts_for_update[$provider['id']])) {
-
                     $postArr = [
                         'ID' => $posts_for_update[$provider['id']],
                         // 'post_title' => $title,
                     ];
                     $post_id = wp_update_post($postArr);
-                    $log .= "updated $post_id $provider_name\n";
-                    foreach ($acf as $field_key => $value) {
+                    $log .= "[Update] $post_id $provider_name_original\n";
+                    foreach (self::ACF_PROVIDER_FIELDS as $field_key => $value) {
                         // update only original content
-                        if (key_exists($field_key . '_original', $acf)) {
+                        if (key_exists($field_key . '_original', self::ACF_PROVIDER_FIELDS)) {
                             continue;
                         }
                         if($$value !== 0) {
@@ -341,32 +374,32 @@ class SyncOffers
                 } else {
                     // Insert the post into the database
                     $newProvider = array(
-                        'post_title'    => $provider_name,
+                        'post_title'    => $provider_name_original,
                         'post_type'     => 'providers',
                         'post_status'   => 'publish',
                     );
                     $post_id = wp_insert_post($newProvider);
-
-
-                    $log .= "new provider $post_id $provider_name\n";
-                    foreach ($acf as $field_key => $value) {
-                        if($$value !== 0) {
-                            update_field($field_key, $$value, $post_id);
+                    $log .= "[Insert] provider $post_id $provider_name_original\n";
+                    foreach (self::ACF_PROVIDER_FIELDS as $field_key => $value) {
+                        if($$value !== 0) { // if image_id is not 0
+                            update_field($field_key, $$value, $post_id); // &&value example: using vars like $pictograms_original
                         }
                     }
                 }
             }
-
-
-
         } while (!$providers['isLastPage']);
 
         file_put_contents($this->file, $log, FILE_APPEND);
+
+        return true;
     }
 
-    const api = 'https://jechange.sn77.net/api/v1/';
-    private $bearer = null;
-    public function api_login()
+    /**
+     * API Login Authorization
+     * @endpoint POST /api/{version}/login
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function apiLogin()
     {
         if ($_SESSION['jechange-api']) {
             $this->bearer = $_SESSION['jechange-api'];
@@ -381,7 +414,7 @@ class SyncOffers
         ];
         try {
             $client = new \GuzzleHttp\Client();
-            $response = $client->request('POST', self::api . $uri, $options);
+            $response = $client->request('POST', self::API_URL . $uri, $options);
             if ($response->getStatusCode() == 200) {
                 $js = json_decode($response->getBody(), 1); // json
                 $this->bearer = 'Bearer ' . $js['token'];
@@ -393,7 +426,18 @@ class SyncOffers
         }
     }
 
-    public function getOffers($service = null, $time = null, $page = 1)
+    /**
+     * Get Offers From the API
+     * @endpoint GET /api/{version}/wordpress/{serviceSlug}/offers
+     * @doc /api/doc
+     *
+     * @param null $service
+     * @param null $time
+     * @param int $page
+     * @return array|mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    private function getOffers($service = null, $time = null, $page = 1)
     {
         // demo data
         // electricite
@@ -407,7 +451,7 @@ class SyncOffers
             // throw new \Exception('no service');
         }
         if ($this->bearer === null) {
-            $this->api_login();
+            $this->apiLogin();
         }
         $uri = "wordpress/$service/offers?page=$page&limit=10&lastSyncAt=$time";
         $options  = [
@@ -417,23 +461,33 @@ class SyncOffers
         ];
         try {
             $client = new \GuzzleHttp\Client();
-            $response = $client->request('get', self::api . $uri, $options);
+            $response = $client->request('get', self::API_URL . $uri, $options);
             if ($response->getStatusCode() == 200) {
                 // echo $response->getBody();exit;
                 $js = json_decode($response->getBody(), 1); // json
                 return $js;
             }
         } catch (\Exception $e) {
+            // TODO Log Exception
             echo '<pre>', var_dump($e), '</pre>';
             exit();
         }
+        return true;
     }
 
-    public function getProviders($time = null, $page = 1)
+    /**
+     * Get Providers From the API
+     * @endpoint GET /api/{version}/providers
+     * @doc /api/doc
+     * @param null $time
+     * @param int $page
+     * @return mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    private function getProviders($time = null, $page = 1)
     {
-
         if ($this->bearer === null) {
-            $this->api_login();
+            $this->apiLogin();
         }
         $uri = "providers?page=$page&limit=50&lastSyncAt=$time";
         $options  = [
@@ -443,19 +497,22 @@ class SyncOffers
         ];
         try {
             $client = new \GuzzleHttp\Client();
-            $response = $client->request('get', self::api . $uri, $options);
+            $response = $client->request('get', self::API_URL . $uri, $options);
             if ($response->getStatusCode() == 200) {
                 $js = json_decode($response->getBody(), 1); // json
                 return $js;
             }
         } catch (\Exception $e) {
+            // TODO Log Exception
             echo '<pre>', var_dump($e), '</pre>';
             exit();
         }
+        return true;
     }
 
     /**
-     * Upload Image From URL and return image_id
+     * Upload Image From External URL and return image_id
+     * Do not upload if file with the same name exists
      * @param $image_url  string
      * @return string|\WP_Error
      */
@@ -477,6 +534,7 @@ class SyncOffers
         }
 
         // If file exists in uploads do not upload again
+        // TODO
         if (file_exists($file)) {
             return false;
         }

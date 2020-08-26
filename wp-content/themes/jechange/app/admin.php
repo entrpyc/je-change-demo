@@ -344,6 +344,26 @@ add_filter('page_row_actions', function ($actions) {
     return $actions;
 });
 
+/**
+ * Add Custom Link In Admin Menu
+ * https://www.bloggersignal.com/add-custom-links-to-wordpress-admin-bar-or-toolbar/
+ * https://premium.wpmudev.org/blog/add-links-wordpress-admin-bar-toolbar/
+ */
+add_action('admin_menu',  function () {
+    global $submenu;
+    $url = '/wp-admin/edit.php?sync-offers';
+    $submenu['edit.php?post_type=offer'][] = array('Synchronize', 'manage_options', wp_nonce_url( $url ));
+    $submenu['edit.php?post_type=providers'][] = array('Synchronize', 'manage_options', wp_nonce_url( $url ));
+});
+/**
+ * Detect if link is Sync Offers and call our hook
+ * The Custom Link is Added through Menu Editor Plugin
+ */
+add_action('parse_request', function () {
+    if($_SERVER["REQUEST_URI"] == html_entity_decode(wp_nonce_url('/wp-admin/edit.php?sync-offers'))) {
+        $syncOffers = new SyncOffers;
+    }
+});
 
 /**
  * ACF Read only (Disable) some fields, coming from the API
@@ -354,8 +374,22 @@ add_filters([
     'acf/load_field/key=field_5f43b5d9aae41', // provider_name_original
     'acf/load_field/key=field_5f43a68bbc6d6', // provider_logo_original
     'acf/load_field/key=field_5f43a64fbc6d4', // provider_description_original
-    'acf/load_field/key=field_5f43a670bc6d5'] // provider_short_description_original
-    , function ($field) {
+    'acf/load_field/key=field_5f43a670bc6d5', // provider_short_description_original
+
+    // offers
+    'acf/load_field/key=field_5f3a67c541538', // offer_id
+    'acf/load_field/key=field_5f3b7b5243c39', // call_center_phone
+    'acf/load_field/key=field_5f36961e5d79b', // title_original
+    'acf/load_field/key=field_5f3b7e3d43c3a', // price
+    'acf/load_field/key=field_5f36965f5d79d', // $description_original
+    'acf/load_field/key=field_5f3a391003169', // $pictograms_original
+    'acf/load_field/key=field_5f3b7e6b43c3b', // $call_me_back
+    'acf/load_field/key=field_5f3b7eaf43c3d', // $show_on_provider
+    'acf/load_field/key=field_5f3b7f1f43c3e', // $is_monthly
+    'acf/load_field/key=field_5f3b7e9243c3c', // $is_active
+    'acf/load_field/key=field_5f3bd6bfd00dd', // $features_original
+
+], function ($field) {
     $field['readonly'] = 1;
     return $field;
 });

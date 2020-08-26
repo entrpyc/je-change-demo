@@ -64,7 +64,6 @@ class SyncOffers
         'field_5f3a67c541538' => 'offer_id',
         'field_5f3643a52befc' => 'service',
         'field_5f4512ecb8497' => 'provider_id', // ACF Provider API ID Custom Field
-        'field_5f3695d05d79a' => 'title',
         'field_5f36961e5d79b' => 'title_original',
         'field_5f3696505d79c' => 'description',
         'field_5f36965f5d79d' => 'description_original',
@@ -95,7 +94,7 @@ class SyncOffers
         $this->lastSyncFile = wp_get_upload_dir()['basedir'] . '/sync_offers_time.php';
         $this->cronLogFile = wp_get_upload_dir()['basedir'] . '/cron_log.txt';
         try {
-            file_put_contents($this->cronLogFile, "\nStart - " . date('d.m.Y H:i:s') . PHP_EOL, FILE_APPEND);
+            file_put_contents($this->cronLogFile, "\n\n-----------------------\nSTART - " . date('d.m.Y H:i:s') . PHP_EOL, FILE_APPEND);
             $start = microtime(true);
             $this->sync();
             $time_elapsed_secs = microtime(true) - $start;
@@ -109,8 +108,6 @@ class SyncOffers
 
     public function sync()
     {
-        // TODO Sync Offers AND CONNECT THEM WITH THE PROVIDERS
-
         // Using file to solve the problem with syncing several times per day // TODO To be discussed
         $lastSyncTime = 0;
         if(file_exists($this->lastSyncFile)){
@@ -210,8 +207,7 @@ class SyncOffers
                 $offer_id = $offer['id'];
                 $service = self::MAP_SERVICES[$offer['service']['id']];
                 $provider_id = $query->posts[0] ?? 0; // get based on the query first result
-                $title = wp_strip_all_tags($offer['name']);
-                $title_original = $title;
+                $title_original = wp_strip_all_tags($offer['name']);
                 $description = $offer['description'];
                 $description_original = $description;
                 $call_center_phone = $offer['callCenterPhone'];
@@ -229,8 +225,8 @@ class SyncOffers
                     $price = $offer['price'];
                 }
                 $is_monthly = ($offer['isMonthly']) ? 1 : 0;
-                $valid_from = $offer['validFrom'] ?? null;
-                $valid_to = $offer['validTo'] ?? null;
+                $valid_from = $offer['validFrom'] ? date('Y-m-d H:i:s',strtotime($offer['validFrom'])) : null;
+                $valid_to = $offer['validTo'] ? date('Y-m-d H:i:s',strtotime($offer['validTo'])) : null;
 
                 $features = '';
                 $pictograms = '';
@@ -269,10 +265,9 @@ class SyncOffers
                 if (isset($posts_for_update[$offer_id])) {
                     $postArr = [
                         'ID' => $posts_for_update[$offer_id],
-                        // 'post_title' => $title,
                     ];
                     $post_id = wp_update_post($postArr);
-                    $log .= "[Update] $post_id $title\n";
+                    $log .= "[Update] $post_id $title_original\n";
                     foreach (self::ACF_OFFER_FIELDS as $field_key => $value) {
                         // update only original content
                         if (key_exists($field_key . '_original', self::ACF_OFFER_FIELDS)) {
@@ -283,12 +278,12 @@ class SyncOffers
                 } else {
                     // Insert the post into the database
                     $newOffer = array(
-                        'post_title'    => $title,
+                        'post_title'    => $title_original,
                         'post_type'     => 'offer',
                         'post_status'   => 'publish',
                     );
                     $post_id = wp_insert_post($newOffer);
-                    $log .= "[Insert] Offer $post_id $title\n";
+                    $log .= "[Insert] Offer $post_id $title_original\n";
                     foreach (self::ACF_OFFER_FIELDS as $field_key => $value) {
                         update_field($field_key, $$value, $post_id); // &&value example: using vars like $pictograms_original
                     }
@@ -312,7 +307,7 @@ class SyncOffers
     private function syncProviders($lastSyncTime)
     {
         $page = 1; // api results
-        $log = "\n ---- PROVIDERS ---- last sync: " . date('d.m.Y H:i:s', $lastSyncTime) . " \n";
+        $log = "\nproviders: last sync: " . date('d.m.Y H:i:s', $lastSyncTime) . " \n";
 
         // do get providers from api until lastPage
         do {

@@ -62,7 +62,12 @@
         <br><button type="submit">Filter</button>
     </form>
     @foreach($data['posts'] as $post)
-    @php($fields = get_fields($post->ID))
+    @php
+        $fields = get_fields($post->ID);
+        $provider = get_post($fields['provider_id']);
+        $providerTitle = $provider->post_title;
+        $providerLogo = get_field('provider_logo', $fields['provider_id']);
+    @endphp
 
     {{-- <pre>@dump($fields)</pre> --}}
     <div class="offer">
@@ -70,10 +75,12 @@
         <div class="offer-wrapper">
             <div class="offer-row">
                 <div class="offer-provider middle-center">
+                    @if($providerLogo['url'])
                     <div>
-                    <img src="{{ $fields['provider_logo'] }}" alt="{{ $fields['provider_name'] }} logo">
+                        <img src="{{ $providerLogo['url'] }}" alt="{{ $providerTitle }} logo">
                     </div>
-                    {{ $fields['provider_name'] }}
+                    @endif
+                    {{ $providerTitle }}
                 </div>
                 <div class="offer-description">
                     {!! $fields['pictograms'] !!}

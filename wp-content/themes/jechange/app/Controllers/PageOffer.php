@@ -147,6 +147,8 @@ class PageOffer extends Controller
                     unset($posts[$k]);
                 }
             }
+
+
         }
         // echo '<pre>', var_dump($posts), '</pre>';exit();
 

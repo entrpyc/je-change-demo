@@ -77,7 +77,9 @@
                 <div class="offer-provider middle-center">
                     @if($providerLogo['url'])
                     <div>
-                        <img src="{{ $providerLogo['url'] }}" alt="{{ $providerTitle }} logo">
+                        <a href="{{ get_permalink($provider) }}">
+                            <img src="{{ $providerLogo['url'] }}" alt="{{ $providerTitle }} logo">
+                        </a>
                     </div>
                     @endif
                     {{ $providerTitle }}

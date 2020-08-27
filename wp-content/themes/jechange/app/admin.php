@@ -114,10 +114,6 @@ add_filter('wp_insert_post_data', function ($data, $postArr) {
         'credit' => 'societes',
     ];
 
-    // if($postArr['post_type'] == 'offer') {
-    // echo '<pre>', var_dump($data), '</pre>';
-    // echo '<pre>', var_dump($postArr), '</pre>';exit();
-    // }
     // PROVIDER 
     if ($postArr['post_type'] == 'providers') {
         $serviceTypeTermId = $postArr['acf']['field_5f323c00dd861'];
@@ -277,7 +273,7 @@ add_filter('post_link', function ($post_link, $post) {
  * @param $query The current query.
  */
 add_action('pre_get_posts', function ($query) {
-    
+
     // Only noop the main query
     if (!$query->is_main_query()) {
         return;
@@ -289,6 +285,7 @@ add_action('pre_get_posts', function ($query) {
     // todo limit 1
     if (!$query->queried_object_id) {
         $query->set('exact_where', "post_name like '" . $query->query['pagename'] . "'");
+        $query->set('posts_per_page', 1);
     }
 
     return $query;

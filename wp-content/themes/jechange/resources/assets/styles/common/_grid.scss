@@ -1,0 +1,75 @@
+section,
+.section {
+  background: #fefefe;
+
+  &.dark-bg {
+    background: #f6f6f6;
+  }
+}
+
+.container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+// Flex
+.flex {
+  display: flex;
+  &.flex-inline {
+    display: inline-flex;
+  }
+  &.flex-wrap {
+    flex-wrap: wrap;
+  }
+  &.flex-row {
+    flex-direction: row;
+  }
+  &.flex-row-reverse {
+    flex-direction: row-reverse;
+  }
+  &.flex-column {
+    flex-direction: column;
+  }
+  &.flex-column-reverse {
+    flex-direction: column-reverse;
+  }
+  &.ai-center {
+    align-items: center;
+  }
+  &.ai-start {
+    align-items: flex-start;
+  }
+  &.ai-end {
+    align-items: flex-end;
+  }
+  &.ai-stretch {
+    align-items: stretch;
+  }
+  &.jc-center {
+    justify-content: center;
+  }
+  &.jc-sb {
+    justify-content: space-between;
+  }
+  &.jc-start {
+    justify-content: flex-start;
+  }
+  &.jc-end {
+    justify-content: flex-end;
+  }
+  &.jc-stretch {
+    justify-content: stretch;
+  }
+}
+
+//Layout
+.overflow-hidden {
+  overflow: hidden;
+}
+
+//css
+// url('../images/arrow_down.svg');
+
+//html
+// @asset('images/alta-logo.svg')

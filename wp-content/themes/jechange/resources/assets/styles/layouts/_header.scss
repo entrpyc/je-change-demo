@@ -1,3 +1,15 @@
-// header {
-
-// }
+header {
+  .ribbon-switch {
+    p {
+      font-weight: 400;
+      font-size: 0.8rem;
+    }
+  }
+  ul {
+    li {
+      a {
+        color: $font-color;
+      }
+    }
+  }
+}

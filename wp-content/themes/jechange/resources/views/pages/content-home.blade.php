@@ -55,7 +55,19 @@
     @endif
 
     @if($row['acf_fc_layout'] == 'add_iframe_block')
-        @include('blocks.block-iframe')
+      @include('blocks.block-iframe')
+    @endif
+
+    @if($row['acf_fc_layout'] == 'add_chess_section_block')
+      @include('blocks.block-chess-sections')
+    @endif
+
+    @if($row['acf_fc_layout'] == 'add_link_icons_block')
+      @include('blocks.block-link-icons')
+    @endif
+
+    @if($row['acf_fc_layout'] == 'add_small_card_block')
+      @include('blocks.block-small-card')
     @endif
 
   @endforeach

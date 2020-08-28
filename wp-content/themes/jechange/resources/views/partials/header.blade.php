@@ -9,15 +9,42 @@
       <div class="brand">
         <a href="{{ home_url('/') }}"><img src="@asset('images/logo-jechange.png')" alt=""></a>
       </div>
-      <div class="flex" data-model-frame style="display:none">
-        <div class="g-1-parent flex flex-column"></div>
-        <div class="g-2-parent flex flex-column"></div>
+      <div data-get="nth-2" class="dropdown">
+        <div class="container-list flex flex-direction-column">
+          <div class="icon-list flex flex-column">
+            <div class="icon-block flex">
+              <img src="" alt="">
+              <div class="text">Électricité moins chère <span>> Voir les offres d'électricité</span></div>
+            </div>
+            <div class="icon-block flex">
+              <img src="" alt="">
+              <div class="text">Électricité moins chère <span>> Voir les offres d'électricité</span></div>
+            </div>
+            <div class="icon-block flex">
+              <img src="" alt="">
+              <div class="text">Électricité moins chère <span>> Voir les offres d'électricité</span></div>
+            </div>
+          </div>
+          <div class="buttons">
+            <div class="greeen-button"></div>
+            <div class="yellow-button"></div>
+          </div>
+          <div class="break"></div>
+          <div class="round-corners flex flex-column">
+            <div class="button"></div>
+            <div class="button"></div>
+            <div class="button"></div>
+          </div>
+          <div class="description flex flex-column">
+            <p>tititit</p>
+            <div class="block">
+              <p>askdjasldkjsa</p>
+              <p>askdjasldkjsa</p>
+              <p>askdjasldkjsa</p>
+            </div>
+          </div>
+        </div>
       </div>
-      {{-- <div data-model-style>
-        <div class="model-1"></div>
-        <div class="model-2"></div>
-        <div class="model-3"></div>
-      </div> --}}
       <nav class="nav-primary" data-model-select>
         @if (has_nav_menu('primary_navigation'))
           {!! wp_nav_menu(['theme_location' => 'primary_navigation', 'menu_class' => 'nav']) !!}

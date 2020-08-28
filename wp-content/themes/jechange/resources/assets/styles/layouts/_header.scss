@@ -44,6 +44,32 @@ header {
           .dropdown {
             display: none;
             position: absolute;
+            width: 656px;
+
+            .container-list {
+              padding: 1rem 1.5rem;
+
+              .icon-list {
+                margin-left: 1.25rem;
+
+                .icon-block {
+                  .text {
+                    margin-left: 0.75rem;
+
+                    a {
+                      color: $font-color;
+                      font-weight: 700;
+                      line-height: inherit;
+                      font-size: 13px;
+
+                      & > a {
+                        font-weight: 400;
+                      }
+                    }
+                  }
+                }
+              }
+            }
 
             &.open {
               display: block;

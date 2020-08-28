@@ -48,3 +48,9 @@ p {
   margin-top: 3rem;
   margin-bottom: 3rem;
 }
+
+a {
+  &:hover {
+    opacity: 0.8;
+  }
+}

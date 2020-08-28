@@ -1,0 +1,36 @@
+footer {
+  background: #343434;
+  padding-bottom: 0.75rem;
+  padding-top: 1.5rem;
+
+  .social-icons {
+    .i {
+      width: 36px;
+      height: 36px;
+
+      svg {
+        max-width: 100%;
+        fill: #fff;
+      }
+
+      & + .i {
+        margin-left: 1.5rem;
+      }
+    }
+  }
+
+  .links {
+    max-width: 80%;
+    ul {
+      list-style: none;
+      margin-left: -1.5rem;
+      li {
+        margin-top: 0.75rem;
+        margin-left: 1.5rem;
+        a {
+          color: #fff;
+        }
+      }
+    }
+  }
+}

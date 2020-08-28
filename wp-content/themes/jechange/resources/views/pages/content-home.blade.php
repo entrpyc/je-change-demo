@@ -1,3 +1,4 @@
+
 @if($data['page_build'])
   @foreach($data['page_build'] as $itteration => $row)
     @if($row['acf_fc_layout'] == 'add_hero_orange_block')
@@ -52,5 +53,10 @@
     @if($row['acf_fc_layout'] == 'add_useful_block')
       @include('blocks.block-useful')
     @endif
+
+    @if($row['acf_fc_layout'] == 'add_iframe_block')
+        @include('blocks.block-iframe')
+    @endif
+
   @endforeach
 @endif

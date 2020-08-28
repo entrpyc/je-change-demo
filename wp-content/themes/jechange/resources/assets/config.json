@@ -9,8 +9,8 @@
     ]
   },
   "publicPath": "/wp-content/themes/jechange",
-  "devUrl": "http://jechange.local",
-  "proxyUrl": "http://localhost:3000",
+  "devUrl": "https://jechange.local",
+  "proxyUrl": "https://localhost:3000",
   "cacheBusting": "[name]_[hash:8]",
   "watch": [
     "app/**/*.php",

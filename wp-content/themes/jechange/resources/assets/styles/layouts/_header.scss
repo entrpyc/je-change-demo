@@ -24,12 +24,6 @@ header {
         display: flex;
         list-style: none;
 
-        li {
-          & > ul {
-            flex-direction: column;
-          }
-        }
-
         & > li {
           padding: 0.75rem;
           text-align: center;
@@ -47,7 +41,7 @@ header {
             font-weight: 800;
           }
 
-          ul {
+          .dropdown {
             display: none;
             position: absolute;
 

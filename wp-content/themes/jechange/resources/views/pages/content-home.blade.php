@@ -46,9 +46,13 @@
                 @if($row['acf_fc_layout'] == 'add_two_column_boxes')
                     @include('blocks.block-two-column-boxes')
                 @endif
-        
+
                 @if($row['acf_fc_layout'] == 'add_useful_block')
                     @include('blocks.block-useful')
+                @endif
+
+                @if($row['acf_fc_layout'] == 'add_iframe_block')
+                    @include('blocks.block-iframe')
                 @endif
         
             @endforeach

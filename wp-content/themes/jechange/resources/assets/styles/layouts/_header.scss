@@ -75,13 +75,21 @@ header {
                       &:nth-of-type(2) {
                         font-weight: 400;
                         display: block;
+                        margin-bottom: 0;
+                        padding-bottom: 0;
                       }
                     }
                   }
 
-                  img {
+                  svg {
                     width: 24px;
                     height: 24px;
+                    color: $font-color;
+                    fill: $font-color;
+                  }
+
+                  & + .icon-block {
+                    margin-top: 10px;
                   }
                 }
               }

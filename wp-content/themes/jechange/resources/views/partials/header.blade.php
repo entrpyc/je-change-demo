@@ -14,19 +14,19 @@
           <div class="left flex flex-column">
             <div class="icon-list flex flex-column">
               <div class="icon-block flex ai-center">
-                <img src="" alt="">
+                <img class="svg" src="@asset('images/svg-icons/light-bulb.svg')" alt="">
                 <div class="text">
                   <a href="https://www.jechange.fr/energie/electricite">Électricité moins chère <span><a href="https://www.jechange.fr/energie/electricite/comparatif">> Voir les offres d'électricité</a></span></a>
                 </div>
               </div>
               <div class="icon-block flex ai-center">
-                <img src="" alt="">
+                <img class="svg" src="@asset('images/svg-icons/flame.svg')" alt="">
                 <div class="text">
                   <a href="https://www.jechange.fr/energie/gaz">Gaz moins cher <span><a href="https://www.jechange.fr/energie/gaz/comparatif">> Voir les offres de gaz</a></span></a>
                 </div>
               </div>
               <div class="icon-block flex ai-center">
-                <img src="" alt="">
+                <img class="svg" src="@asset('images/svg-icons/battery.svg')" alt="">
                 <div class="text">
                   <a href="https://www.jechange.fr/energie/duale">Duale (électricité et gaz) <span><a href="https://www.jechange.fr/energie/duale/comparatif">> Voir les offres électricité et gaz</a></span></a>
                 </div>

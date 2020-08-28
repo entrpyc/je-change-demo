@@ -44,10 +44,19 @@ header {
           .dropdown {
             display: none;
             position: absolute;
+            top: calc(100%);
+            left: 0;
             width: 656px;
+            background: #fff;
+            padding-top: 20px;
 
             .container-list {
               padding: 1rem 1.5rem;
+
+              .left,
+              .right {
+                width: 50%;
+              }
 
               .icon-list {
                 margin-left: 1.25rem;
@@ -55,6 +64,7 @@ header {
                 .icon-block {
                   .text {
                     margin-left: 0.75rem;
+                    text-align: left;
 
                     a {
                       color: $font-color;
@@ -62,9 +72,134 @@ header {
                       line-height: inherit;
                       font-size: 13px;
 
-                      & > a {
+                      &:nth-of-type(2) {
                         font-weight: 400;
+                        display: block;
                       }
+                    }
+                  }
+
+                  img {
+                    width: 24px;
+                    height: 24px;
+                  }
+                }
+              }
+
+              .buttons {
+                .greeen-button {
+                  a {
+                    background-color: #14f397;
+                    border-color: #fefefe;
+                    text-decoration: none;
+                    display: inline-block;
+                    vertical-align: middle;
+                    width: auto;
+                    border-radius: 99em;
+                    border-style: solid;
+                    border-width: 2px;
+                    color: #0a0a0a;
+                    cursor: pointer;
+                    padding: 0.75rem 1rem;
+                    position: relative;
+                    text-align: center;
+                    margin-top: 0.75rem;
+                    font-weight: 600;
+                    margin-bottom: 0.75rem;
+
+                    &:hover {
+                      opacity: 0.8;
+                    }
+                  }
+                }
+
+                .yellow-button {
+                  a {
+                    font-weight: 600;
+                    border-color: #ffc766;
+                    padding: 0.75rem 1rem;
+                    position: relative;
+                    text-align: center;
+                    background-color: transparent;
+                    border-radius: 99em;
+                    border-style: solid;
+                    border-width: 2px;
+                    color: #0a0a0a;
+                    cursor: pointer;
+                    display: inline-block;
+                    vertical-align: middle;
+                    width: auto;
+                    text-decoration: none;
+                    margin: 0;
+
+                    &:hover {
+                      opacity: 0.8;
+                    }
+                  }
+                }
+              }
+
+              .round-corners {
+                .button {
+                  a {
+                    margin-top: 0;
+                    text-decoration: none;
+                    display: inline-block;
+                    color: $font-color;
+                    border-color: #f2f2ec;
+                    border-radius: 99em;
+                    border-style: solid;
+                    border-width: 2px;
+                    font-weight: normal;
+                    padding: 0.25rem 1.25rem;
+                    text-align: center;
+                    cursor: pointer;
+
+                    &:hover {
+                      background-color: #ffc766;
+                      border-color: #ffa200;
+                      color: #996100 !important;
+                    }
+                  }
+                }
+              }
+
+              .description {
+                & > p {
+                  font-size: 1rem;
+                  display: block;
+                  font-weight: bold;
+                  text-align: left;
+                  margin: 0.75rem 0;
+                }
+
+                .block {
+                  text-align: left;
+                  background-color: #f2f2ec;
+                  border-radius: 0.75rem;
+                  margin-left: 0;
+                  margin-bottom: 1.25rem;
+                  padding: 1.25rem;
+                  display: block;
+                  list-style-position: outside;
+                  line-height: 1.5rem;
+                  // padding-bottom: 0;
+
+                  p {
+                    margin-bottom: 0.75rem;
+
+                    a {
+                      text-decoration: none;
+                      display: inline-block;
+                      color: $font-color;
+                      font-weight: 400;
+                      font-size: 13px;
+                      margin: 0;
+                      padding: 0;
+                    }
+
+                    &:last-child {
+                      margin-bottom: 0;
                     }
                   }
                 }

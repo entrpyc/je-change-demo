@@ -33,12 +33,12 @@
               </div>
             </div>
             <div class="buttons">
-              <div class="greeen-button"><a href="https://www.jechange.fr/energie/electricite/comparateur">Comparer les offres d'énergie</a></div>
-              <div class="yellow-button"><a href="https://www.jechange.fr/services/depannage">Assistance Pannes</a></div>
+              <div class="greeen-button flex jc-start"><a href="https://www.jechange.fr/energie/electricite/comparateur">Comparer les offres d'énergie</a></div>
+              <div class="yellow-button flex jc-start"><a href="https://www.jechange.fr/services/depannage">Assistance Pannes</a></div>
             </div>
           </div>
           <div class="right flex flex-column">
-            <div class="round-corners flex flex-column">
+            <div class="round-corners flex flex-column ai-start">
               <div class="button"><a href="https://www.jechange.fr/energie/news">L'<b>actualité</b> énergie</a></div>
               <div class="button"><a href="https://www.jechange.fr/energie/guides">Les <b>guides</b> énergie</a></div>
               <div class="button"><a href="https://www.jechange.fr/energie/fournisseurs">Les <b>fournisseurs d'énergie</b></a></div>

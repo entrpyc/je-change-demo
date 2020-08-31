@@ -50,3 +50,50 @@
     }
   }
 }
+
+.hero-orange-regular {
+  background-color: #ffa200 !important;
+
+  .info {
+    h1 {
+      color: #000;
+      font-size: 2rem;
+      line-height: 2.25rem;
+      margin-top: 0;
+      margin-bottom: 0.75rem;
+    }
+
+    .text {
+      p {
+        font-weight: normal;
+        color: #000;
+        font-size: 1.5rem;
+        line-height: 2.25rem;
+        margin-top: 0;
+        margin-bottom: 0.75rem;
+        text-rendering: geometricPrecision;
+        font-style: normal;
+      }
+    }
+
+    .buttons-wrapper {
+      .green-btn {
+        a {
+          background-color: #14f397;
+          border-color: #fefefe;
+          color: #0a0a0a;
+          text-align: center;
+          border-radius: 99em;
+          border-style: solid;
+          border-width: 2px;
+          cursor: pointer;
+          position: relative;
+          text-decoration: none;
+          font-weight: 600;
+          outline: 0;
+          height: 229px;
+        }
+      }
+    }
+  }
+}

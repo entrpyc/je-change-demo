@@ -12,11 +12,9 @@
   
     <img style="max-width: 520px;" src="{{ $row['hero_image'] }}" alt="hero-image">
   
-    @if(isset($type))
-      <div class="hero-button vr">
-        <a href="https://www.jechange.fr/tousmescontrats">Démarrer</a>
-      </div>
-    @endif
+    <div class="hero-button vr">
+      <a href="https://www.jechange.fr/tousmescontrats">Démarrer</a>
+    </div>
   </div>
 </section>
 @else 
@@ -29,7 +27,10 @@
           {!! $row['hero_text'] !!}
         </div>
       @endif
-      <div class="buttons-wrapper">
+      <div class="buttons-wrapper flex jc-start ai-stretch">
+        <div class="green-btn">
+          <a href="{{$row['hero_green_button_link']}}">@if($row['hero_green_button_icon'])<img src="{{$row['hero_green_button_icon']}}" alt="">@endif{{$row['hero_green_button_text']}}</a>
+        </div>
         <div class="button-border"><a href="tel:+33800811911" class="flex flex-column ai-center jc-center">
           <div class="btn">Ou appelez directement le :<br><span class="num">0800 811 911</span></div>
           <span class="text">Appel gratuit</span></a></div>

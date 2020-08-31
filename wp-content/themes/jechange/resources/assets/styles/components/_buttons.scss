@@ -1,0 +1,38 @@
+.button-border {
+  a {
+    text-decoration: none;
+    text-align: center;
+    display: block;
+
+    .btn {
+      border-radius: 99em;
+      border-style: solid;
+      border-width: 2px;
+      color: #0a0a0a;
+      cursor: pointer;
+      position: relative;
+      text-align: center;
+      text-decoration: none;
+      font-weight: 400;
+      outline: 0;
+      font-size: 13px;
+      padding: 12px 34px;
+
+      .num {
+        font-weight: 600;
+        font-size: 16px;
+        margin-top: 6px;
+        display: block;
+      }
+    }
+    .text {
+      font-size: 13px;
+      color: #0a0a0a;
+      margin-top: 8px;
+    }
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+}

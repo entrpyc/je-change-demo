@@ -1,4 +1,4 @@
-<section class="block two-column">
+<section class="block chess-section">
     <div class="container flex flex-column vr">
       <div class="title"><h2>{{ $row['chess_title'] }}</h2></div>
       @foreach($row['chess_repeater'] as $itt => $item)

@@ -1,4 +1,3 @@
-
 @if($data['page_build'])
     @foreach($data['page_build'] as $itteration => $row)
         @if($row['acf_fc_layout'] == 'add_hero_orange_block')

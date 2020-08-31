@@ -1,14 +1,4 @@
-{{-- {{ $row['hero_title'] }}
-<img src="{{ $row['hero_image'] }}" alt="hero-image">
-{!! $row['hero_text'] !!}
-{{ $row['hero_title'] }}
-{{ $row['hero_green_button_icon'] }}
-{{ $row['hero_green_button_text'] }}
-{{ $row['hero_green_button_link'] }}
-{{ $row['hero_button_text'] }}
-{{ $row['hero_button_phone'] }}
-{{ $row['hero_button_link'] }} --}}
-
+@if($row['hero_type'] == 'Large')
 <section class="block hero-orange">
   <div class="container flex flex-column ai-center">
     @if($row['hero_title'])
@@ -29,3 +19,25 @@
     @endif
   </div>
 </section>
+@else 
+<section class="block hero-orange-regular">
+  <div class="container flex">
+    <div class="info">
+      <h1>{{ $row['hero_title'] }}</h1>
+      @if($row['hero_text'])
+        <div class="text">
+          {!! $row['hero_text'] !!}
+        </div>
+      @endif
+      <div class="buttons-wrapper">
+        <div class="button-border"><a href="tel:+33800811911" class="flex flex-column ai-center jc-center">
+          <div class="btn">Ou appelez directement le :<br><span class="num">0800 811 911</span></div>
+          <span class="text">Appel gratuit</span></a></div>
+      </div>
+    </div>
+    <div class="image">
+      <img src="{{ $row['hero_image'] }}" alt="">
+    </div>
+  </div>
+</section>
+@endif

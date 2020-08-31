@@ -29,23 +29,29 @@ export default {
     document.querySelector('.mega-menu.nth-3').appendChild(document.querySelector('[data-get="nth-3"]'))
 
     // img to svg
-    $('img.svg').each(function () {
-      var $img = jQuery(this);
-      var imgID = $img.attr('id');
-      var imgClass = $img.attr('class');
-      var imgURL = $img.attr('src');
-      $.get(imgURL, function (data) {
-        var $svg = jQuery(data).find('svg');
-        if (typeof imgID !== 'undefined') {
-          $svg = $svg.attr('id', imgID);
-        }
-        if (typeof imgClass !== 'undefined') {
-          $svg = $svg.attr('class', imgClass + ' replaced-svg');
-        }
-        $svg = $svg.removeAttr('xmlns:a');
-        $img.replaceWith($svg);
-      }, 'xml');
-    });
+    $(window).on('load', () => {
+      setTimeout(() => {
+        $('img.svg').each(function () {
+          var $img = jQuery(this);
+          var imgID = $img.attr('id');
+          var imgClass = $img.attr('class');
+          var imgURL = $img.attr('src');
+          $.get(imgURL, function (data) {
+            var $svg = jQuery(data).find('svg');
+            if (typeof imgID !== 'undefined') {
+              $svg = $svg.attr('id', imgID);
+            }
+            if (typeof imgClass !== 'undefined') {
+              $svg = $svg.attr('class', imgClass + ' replaced-svg');
+            }
+            $svg = $svg.removeAttr('xmlns:a');
+            $img.replaceWith($svg);
+          }, 'xml');
+          // console.log($img)
+          // $img.addClass('visible')
+        });
+      }, 3000);
+    })
   },
   finalize() {
     // JavaScript to be fired on all pages, after page specific JS is fired

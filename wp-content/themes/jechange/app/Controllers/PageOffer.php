@@ -157,6 +157,7 @@ class PageOffer extends Controller
             'type' => $type,
             'posts' => $posts,
             'page_build' => get_field('page_build',  get_the_ID()) // PAGE BUILD
+            // 'layout' => $data,
         ];
     }
 }

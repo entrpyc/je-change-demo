@@ -1,4 +1,4 @@
-<style>
+{{-- <style>
     .container {
         margin: 10px auto;
         max-width: 100%;
@@ -54,14 +54,14 @@
         background-color: #eee;
         padding: 5px 15px;
     }
-</style>
+</style> --}}
 
-<div class="container">
-    <form method="get" action="<?php the_permalink(); ?>">
-        @include('partials.filters.'.$data['type'])
+{{-- <div class="container">
+    <form method="get" action="@php the_permalink(); @endphp"> 
+        @include('partials.filters.'.$listing['type'])
         <br><button type="submit">Filter</button>
     </form>
-    @foreach($data['posts'] as $post)
+    @foreach($listing['posts'] as $post)
     @php
         $fields = get_fields($post->ID);
         $provider = get_post($fields['provider_id']);
@@ -69,7 +69,7 @@
         $providerLogo = get_field('provider_logo', $fields['provider_id']);
     @endphp
 
-    {{-- <pre>@dump($fields)</pre> --}}
+    
     <div class="offer">
         <h2>{{ $fields['title'] }}</h2>
         <div class="offer-wrapper">
@@ -117,4 +117,6 @@
         </div>
     </div>
     @endforeach
-</div>
+</div> --}}
+
+@include('pages.content-page-build')

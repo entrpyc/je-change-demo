@@ -10,7 +10,7 @@ class PageOffer extends Controller
     {
     }
 
-    public function data()
+    public function listing()
     {
         //do_action('sync_offers');
 
@@ -155,6 +155,16 @@ class PageOffer extends Controller
         return [
             'type' => $type,
             'posts' => $posts,
+            // 'layout' => $data,
         ];
+    }
+
+    public function data()
+    {
+        $data['id'] = get_the_ID();
+
+        $data['page_build'] = get_field('page_build', $data['id']);
+
+        return $data;
     }
 }

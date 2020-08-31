@@ -1,0 +1,45 @@
+.link-icons {
+  .container {
+    padding-top: 1.25rem;
+    padding-bottom: 5rem;
+  }
+  h2 {
+    margin-bottom: 1rem;
+    color: #ffa200;
+    text-align: center;
+  }
+  .icons-container {
+    .icon-block {
+      padding: 0 2.4rem;
+      max-width: 277px;
+
+      img {
+        margin: 0 auto;
+        max-width: 100px;
+        max-height: 100px;
+        height: auto;
+        width: auto;
+      }
+
+      a:first-of-type {
+        color: $font-color;
+        text-decoration: none;
+        position: relative;
+        z-index: 3;
+      }
+
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+
+    &.orange-color {
+      .icon-block {
+        a {
+          color: #ffa200;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}

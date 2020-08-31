@@ -1,9 +1,9 @@
 <footer>
   <div class="container">
     <div class="social-icons flex">
-      <div class="i"><img src="@asset('images/svg-icons/social-fb.svg')" alt=""></div>
-      <div class="i"><img src="@asset('images/svg-icons/social-tw.svg')" alt=""></div>
-      <div class="i"><img src="@asset('images/svg-icons/social-ig.svg')" alt=""></div>
+      <div class="i"><img class="svg" src="@asset('images/svg-icons/social-fb.svg')" alt=""></div>
+      <div class="i"><img class="svg" src="@asset('images/svg-icons/social-tw.svg')" alt=""></div>
+      <div class="i"><img class="svg" src="@asset('images/svg-icons/social-ig.svg')" alt=""></div>
     </div>
     <div class="links">
       <ul class="flex flex-wrap">

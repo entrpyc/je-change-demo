@@ -37,6 +37,7 @@ class SingleProviders extends Controller
 
         return [
             'posts' => $posts,
+            'page_build' => get_field('page_build', $provider_id) // PAGE BUILD
         ];
     }
 

@@ -10,7 +10,7 @@ class PageOffer extends Controller
     {
     }
 
-    public function listing()
+    public function data()
     {
         //do_action('sync_offers');
 
@@ -152,19 +152,12 @@ class PageOffer extends Controller
         }
         // echo '<pre>', var_dump($posts), '</pre>';exit();
 
+
         return [
             'type' => $type,
             'posts' => $posts,
+            'page_build' => get_field('page_build',  get_the_ID()) // PAGE BUILD
             // 'layout' => $data,
         ];
-    }
-
-    public function data()
-    {
-        $data['id'] = get_the_ID();
-
-        $data['page_build'] = get_field('page_build', $data['id']);
-
-        return $data;
     }
 }

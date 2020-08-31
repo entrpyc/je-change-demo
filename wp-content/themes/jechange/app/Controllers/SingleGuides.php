@@ -5,7 +5,7 @@ namespace App\Controllers;
 use Sober\Controller\Controller;
 use WP_Query;
 
-class SinglePost extends Controller
+class SingleGuides extends Controller
 {
     public function __construct()
     {
@@ -26,6 +26,8 @@ class SinglePost extends Controller
         $data['image'] = get_the_post_thumbnail_url($id, 'full');
 
         // TODO Service Type & Service ...
+
+        dd('asdasd');
 
         return $data;
     }

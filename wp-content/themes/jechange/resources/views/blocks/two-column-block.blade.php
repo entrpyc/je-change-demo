@@ -4,4 +4,6 @@
 {{ $row['right_button_text'] }}
 {{ $row['right_button_link'] }} --}}
 
-<section class="two-column"></section>
+<section class="two-column">
+  <div class="container"></div>
+</section>

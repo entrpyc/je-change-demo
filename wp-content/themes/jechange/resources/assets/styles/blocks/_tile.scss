@@ -1,0 +1,24 @@
+.tile.block {
+  .container {
+    .card {
+      box-shadow: -2px 12px 8px rgba(0, 0, 0, 0.075);
+      .content {
+        width: 66.66667%;
+        padding-right: 0.9375rem;
+        padding-left: 0.9375rem;
+        padding-bottom: 3rem;
+        padding-top: 3rem;
+        background: #f2f2ec;
+      }
+      .side {
+        width: 33.33333%;
+        padding-right: 0.9375rem;
+        padding-left: 0.9375rem;
+        padding-bottom: 3rem;
+        padding-top: 3rem;
+        background-color: #ffa200;
+        background-image: url("../images/shape-vertical-wave.svg");
+      }
+    }
+  }
+}

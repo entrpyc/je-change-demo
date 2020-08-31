@@ -25,4 +25,34 @@
         @endsection
     @endif
 
+    @if($post_type == 'post')
+        @section('content')
+            @include('pages.content-single-post', ['data' => \App\Controllers\SinglePost::data()])
+        @endsection
+    @endif
+
+    @if($post_type == 'guides')
+        @section('content')
+            @include('pages.content-single-guides', ['data' => \App\Controllers\SingleGuides::data()])
+        @endsection
+    @endif
+
+    @if($post_type == 'provider_article')
+        @section('content')
+            @include('pages.content-single-provider-article', ['data' => \App\Controllers\SingleProviderArticle::data()])
+        @endsection
+    @endif
+
+    @if($post_type == 'press_release')
+        @section('content')
+            @include('pages.content-single-press-release', ['data' => \App\Controllers\SinglePressRelease::data()])
+        @endsection
+    @endif
+
+    @if($post_type == 'press_review')
+        @section('content')
+            @include('pages.content-single-press-review', ['data' => \App\Controllers\SinglePressReview::data()])
+        @endsection
+    @endif
+
 @endif

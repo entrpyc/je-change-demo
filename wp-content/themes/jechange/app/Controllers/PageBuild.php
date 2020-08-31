@@ -12,8 +12,10 @@ class PageBuild extends Controller
 
     public function data()
     {
-        dd('page build');
-        return [];
+        $data['id'] = get_the_ID();
+        $data['page_build'] = get_field('page_build', $data['id']);
+
+        return $data;
     }
 
 }

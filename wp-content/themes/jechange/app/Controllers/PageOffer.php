@@ -152,9 +152,11 @@ class PageOffer extends Controller
         }
         // echo '<pre>', var_dump($posts), '</pre>';exit();
 
+
         return [
             'type' => $type,
             'posts' => $posts,
+            'page_build' => get_field('page_build',  get_the_ID()) // PAGE BUILD
         ];
     }
 }

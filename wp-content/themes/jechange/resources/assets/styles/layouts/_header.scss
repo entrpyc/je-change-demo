@@ -1,8 +1,31 @@
 header {
   .ribbon-switch {
+    padding-top: 6px;
+    padding-bottom: 6px;
     p {
       font-weight: 400;
       font-size: 0.8rem;
+    }
+
+    .switch-icon {
+      width: 24px;
+      height: 12px;
+      background: $font-color;
+      position: relative;
+      border-radius: 20px;
+      margin: 0 5px;
+
+      &::after {
+        content: '';
+        display: block;
+        background: #fff;
+        width: 9.6px;
+        height: 9.6px;
+        position: absolute;
+        left: 1px;
+        top: 1px;
+        border-radius: 50%;
+      }
     }
   }
   .menu {
@@ -28,6 +51,8 @@ header {
           padding: 0.75rem;
           text-align: center;
           position: relative;
+          display: flex;
+          align-items: center;
 
           a {
             padding: 0.3rem;
@@ -39,6 +64,40 @@ header {
             padding-right: 0;
             transition: all ease 0.2s;
             font-weight: 800;
+            position: relative;
+          }
+
+          &.rounded {
+            padding: 0.75rem;
+            a {
+              padding: 0.65rem 2.2rem;
+              display: block;
+              white-space: nowrap;
+              background-color: #f2f2ec;
+              border: none;
+              border-radius: 1.8rem;
+              text-decoration: none;
+              font-size: inherit;
+              color: $font-color;
+              transition: all ease 0.2s;
+
+              &:hover {
+                opacity: 0.8;
+
+                &::after {
+                  display: none;
+                }
+              }
+            }
+          }
+
+          &.phone {
+            a {
+              font-size: 1.275rem;
+              cursor: pointer;
+              text-decoration: none;
+              font-weight: 700;
+            }
           }
 
           .dropdown {
@@ -221,8 +280,48 @@ header {
         }
       }
 
-      & div > ul {
-        border-left: 2px solid #000;
+      .menu-main-navigation-container {
+        .nav {
+          position: relative;
+          &::before {
+            content: '';
+            width: 2px;
+            background: #000;
+            height: 50%;
+            left: 0;
+            top: 25%;
+            position: absolute;
+          }
+        }
+      }
+
+      & > .menu-main-navigation-container > ul:first-of-type:not(#menu-main-navigation) {
+        li {
+          a {
+            position: relative;
+
+            &::after {
+              content: '';
+              width: 100%;
+              position: absolute;
+              bottom: -7px;
+              left: 0;
+              height: 2px;
+              background: #000;
+              opacity: 0;
+              transition: 0.2s all ease-in-out;
+            }
+
+            &:hover {
+              opacity: 1;
+              color: #000;
+
+              &::after {
+                opacity: 1;
+              }
+            }
+          }
+        }
       }
     }
   }

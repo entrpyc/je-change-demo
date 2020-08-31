@@ -4,27 +4,29 @@ export default {
 
     // console.log(mainNavItems)
 
-    mainNavItems.forEach(item => {
-      item.addEventListener('mouseenter', () => {
-        openMenu(item)
+    window.onload = () => {
+      mainNavItems.forEach(item => {
+        item.addEventListener('mouseenter', () => {
+          openMenu(item, 'enter')
+        })
+  
+        item.addEventListener('mouseleave', () => {
+          openMenu(item, 'leave')
+        })
       })
+    }
 
-      item.addEventListener('mouseleave', () => {
-        openMenu(item)
-      })
-    })
-
-    function openMenu(item) {
+    function openMenu(item, event) {
 
       if (!item.querySelector('.dropdown'))
         return;
 
-      item.querySelector('.dropdown').classList.toggle('open')
+      event == 'leave' ? item.querySelector('.dropdown').classList.remove('open') :
+      item.querySelector('.dropdown').classList.add('open')
     }
 
-    console.log(document.querySelector('.mega-menu.nth-2'))
-    console.log(document.querySelector('[data-get="nth-2"]'))
     document.querySelector('.mega-menu.nth-2').appendChild(document.querySelector('[data-get="nth-2"]'))
+    document.querySelector('.mega-menu.nth-3').appendChild(document.querySelector('[data-get="nth-3"]'))
 
     // img to svg
     $('img.svg').each(function () {

@@ -1,121 +1,95 @@
-<style>
-    .container {
-        margin: 10px auto;
-        max-width: 100%;
-        width: 1020px;
-    }
+@include('pages.content-page-build')
 
-    .offer {
-        line-height: 150%;
-        padding: 5px 15px;
-        margin: 15px auto;
-        background-color: #fcfcfc !important;
-    }
-
-    .offer,
-    .offer-wrapper {
-        border: 1px solid #eee;
-        background-color: #fff;
-    }
-
-    .offer-row {
-        display: flex;
-        justify-content: space-between
-    }
-
-    .offer-row>div {
-        width: 25%;
-    }
-
-    .btn-offer {
-        display: block;
-        margin: 0 auto;
-        padding: 5px 15px;
-        text-decoration: none;
-        color: #fff;
-        border-radius: 5px;
-        background-color: #2a9ee3;
-    }
-
-    .offer-price {
-        background-color: #fac261;
-        font-size: 120%;
-        font-weight: 500;
-    }
-
-    .middle-center {
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-
-    .offer .features {
-        background-color: #eee;
-        padding: 5px 15px;
-    }
-</style>
-<div class="container">
-    <form method="get" action="@php the_permalink(); @endphp">
-        @include('partials.filters.'.$data['type'])
-        <br><button type="submit">Filter</button>
-    </form>
-    @foreach($data['posts'] as $postObj)
-    @php
-        $fields = get_fields($postObj->ID);
-        $provider = get_post($fields['provider_id']);
-        $providerTitle = $provider->post_title;
-        $providerLogo = get_field('provider_logo', $fields['provider_id']);
-    @endphp
-
-
-    <div class="offer">
-        <h2>{{ $fields['title'] }}</h2>
-        <div class="offer-wrapper">
-            <div class="offer-row">
-                <div class="offer-provider middle-center">
-                    @if($providerLogo['url'])
-                    <div>
-                        <a href="{{ get_permalink($provider) }}">
-                            <img src="{{ $providerLogo['url'] }}" alt="{{ $providerTitle }} logo">
-                        </a>
-                    </div>
-                    @endif
-                    {{ $providerTitle }}
-                </div>
-                <div class="offer-description">
-                    {!! $fields['pictograms'] !!}
-                    {!! $fields['description'] !!}
-                </div>
-                <div class="offer-price middle-center">
-
-                    @if($fields['is_monthly'])
-                    {{  number_format((float) $fields['price'], 2) }}
-                    € / month
-                    @else
-                    € {{ number_format((float) $fields['price'], 2) }}
-                    @endif
-                </div>
-                <div class="offer-contact middle-center">
-                    {{ $fields['call_center_phone']}}
-                    @if($fields['call_me_back'])
-                    <a href="tel:{{ str_replace(' ', '', trim($fields['call_center_phone'])) }}"
-                        class="btn btn-primary btn-offer">
-                        Me faire rappeler
-                    </a>
-                    @endif
-                </div>
-            </div>
-            <div class="features">
-                <ul>
-                    @foreach($fields['features'] as $feature)
-                    <li>{{ $feature['filter_text'] }}</li>
-                    @endforeach
-                </ul>
+<section class="offers-filters dark-bg">
+    <div class="container">
+        <p class="title">Les meilleures offres Internet</p>
+        <div class="fit">
+            <div class="name">Triez les résultats</div>
+            <div class="filters">
+                <form data-submit-on-change method="get" action="<?php the_permalink(); ?>">
+                    @include('partials.filters.'.$data['type'])
+                    <button class="hidden" type="submit"></button>
+                </form>
             </div>
         </div>
     </div>
-    @endforeach
-</div>
-
-@include('pages.content-page-build')
+</section>
+<section class="offers-listing dark-bg offset-bottom">
+    <div class="container">
+        <table>
+            <caption>Classement réalisé par prix croissant</caption>
+            <thead>
+                <tr>
+                    <th>FAI</th>
+                    <th>Offre</th>
+                    <th>Tarif</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($data['posts'] as $postObj)
+                @php
+                    $fields = get_fields($postObj->ID);
+                    $provider = get_post($fields['provider_id']);
+                    $providerTitle = $provider->post_title;
+                    $providerLogo = get_field('provider_logo', $fields['provider_id']);
+                @endphp
+                <tr>
+                    <td class="logo">
+                        <div class="flex flex-column ai-center relative">
+                            @if($providerLogo['url'])
+                            <img src="{{ $providerLogo['url'] }}" alt="{{ $providerTitle }} logo">
+                            @endif
+                            {{ $providerTitle }}
+                            <a class="block-link" href="{{ get_permalink($provider) }}"></a>
+                        </div>
+                    </td>
+                    <td class="description">
+                        <div class="flex flex-column">
+                            {!! $fields['pictograms'] !!}
+                            {!! $fields['description'] !!}
+                            <ul>
+                                @foreach($fields['features'] as $feature)
+                                <li>{{ $feature['filter_text'] }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </td>
+                    <td class="price">
+                        <div>
+                            <p>
+                                @if($fields['is_monthly'])
+                                {{  number_format((float) $fields['price'], 2) }}
+                                € / month
+                                @else
+                                € {{ number_format((float) $fields['price'], 2) }}
+                                @endif
+                            </p>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="action">
+                            @if($fields['call_me_back'])
+                            <a class="green-button" href="tel:{{ str_replace(' ', '', trim($fields['call_center_phone'])) }}">
+                                Me faire rappeler
+                            </a>
+                            @endif
+                            <a class="orange-border-button" href="tel:{{ str_replace(' ', '', trim($fields['call_center_phone'])) }}">
+                                {{ $fields['call_center_phone']}}
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>FAI</th>
+                    <th>Offre</th>
+                    <th>Tarif</th>
+                    <th></th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</section>

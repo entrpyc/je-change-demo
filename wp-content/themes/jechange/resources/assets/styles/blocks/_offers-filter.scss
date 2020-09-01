@@ -1,0 +1,44 @@
+.offers-filters {
+  .container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+
+    .title {
+      font-weight: 700;
+      color: #000;
+      font-size: 1.5rem;
+      line-height: 2.25rem;
+      margin-top: 0;
+      margin-bottom: 0.75rem;
+      text-align: center;
+    }
+    .fit {
+      border-radius: 99rem;
+      padding: 1.5rem;
+      background-color: #fefefe;
+      text-align: center;
+      box-shadow: 0 5px 5px #c7c7c7;
+
+      .name {
+        font-weight: 800;
+        margin: 0 auto 0.5rem;
+      }
+
+      form {
+        & > div {
+          margin: 10px 0;
+        }
+      }
+
+      .filters {
+        p {
+          margin-right: 5px;
+        }
+
+        label {
+          margin: 0 10px;
+        }
+      }
+    }
+  }
+}

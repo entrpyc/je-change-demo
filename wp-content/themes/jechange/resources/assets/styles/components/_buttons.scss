@@ -36,3 +36,38 @@
     }
   }
 }
+
+.green-button {
+  background-color: #14f397;
+  border-color: #fefefe;
+  width: auto;
+  border-radius: 99em;
+  border-style: solid;
+  border-width: 2px;
+  color: #0a0a0a;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 0.75rem 1.5rem;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  border: 0;
+  font-size: 100%;
+  display: block;
+}
+
+.orange-border-button {
+  background-color: transparent;
+  border-radius: 99em;
+  border-style: solid;
+  border-width: 2px;
+  color: #0a0a0a;
+  cursor: pointer;
+  padding: 0.75rem 1.5rem;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  border-color: #ffc766;
+  line-height: 1.5rem;
+  display: block;
+}

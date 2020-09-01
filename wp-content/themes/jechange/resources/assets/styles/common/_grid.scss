@@ -5,6 +5,10 @@ section,
   &.dark-bg {
     background: #f6f6f6;
   }
+
+  &.offset-bottom {
+    margin-bottom: 50px;
+  }
 }
 
 .container {

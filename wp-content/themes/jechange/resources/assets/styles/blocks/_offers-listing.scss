@@ -1,0 +1,135 @@
+.offers-listing {
+  .container {
+    table {
+      background: #fff;
+
+      caption {
+        color: #996100;
+        background-color: #fefefe;
+        margin: 0;
+        padding: 1em;
+        text-align: center;
+        display: table-caption;
+        width: 100%;
+      }
+      thead,
+      tfoot {
+        display: table-header-group;
+
+        tr {
+          th {
+            width: auto;
+            color: #fefefe;
+            font-weight: normal;
+            overflow: hidden;
+            text-align: center;
+            text-overflow: ellipsis;
+            border-color: #ffa200;
+            background-color: #ffa200;
+            vertical-align: middle;
+            display: table-cell;
+            border-bottom-style: solid;
+            border-width: 0;
+            cursor: default;
+            min-width: 20px;
+            padding: 1rem;
+            margin: 0;
+          }
+        }
+      }
+      tbody {
+        display: table-row-group;
+        width: auto;
+
+        tr {
+          background: #fefefe;
+          border-style: solid;
+          border-width: 2px 0 0;
+          border-color: #ffa200;
+          margin-bottom: inherit;
+          width: auto;
+
+          td {
+            text-align: center;
+            cursor: default;
+            min-width: 120px;
+            padding: 1rem;
+            vertical-align: top;
+            border-bottom: 1px solid #f6f6f6;
+            border-top: 1px solid #f6f6f6;
+            border-color: #8a8a8a;
+            border-style: solid;
+            border-width: 0;
+            border-bottom-style: solid;
+            max-width: 100%;
+
+            & > div {
+              text-align: left;
+              // min-width: max-content;
+            }
+
+            &.logo {
+              width: 200px;
+
+              div {
+                text-decoration: underline;
+                color: #996100;
+
+                img {
+                  margin-bottom: 12px;
+                }
+
+                &:hover {
+                  opacity: 0.8;
+                }
+              }
+            }
+
+            &.description {
+              ul {
+                margin: 0.75rem 0 0.75rem 0;
+                padding: 0;
+
+                li {
+                  list-style-type: none;
+                  margin-left: 1.5rem;
+                  position: relative;
+
+                  &::before {
+                    color: #ffa200;
+                    content: "●";
+                    border-radius: 99%;
+                    display: inline-block;
+                    font-size: 1.5rem;
+                    left: -1.5rem;
+                    position: absolute;
+                    top: 50%;
+                    transform: translateY(-50%);
+                  }
+
+                  & + li {
+                    margin-top: 0.75rem;
+                  }
+                }
+              }
+            }
+
+            &.price {
+              p {
+                display: block;
+                font-size: 1.25rem;
+                font-weight: bold;
+              }
+            }
+
+            .action {
+              a:nth-child(2) {
+                margin-top: 15px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

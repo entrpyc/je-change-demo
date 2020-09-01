@@ -1,7 +1,7 @@
 <section class="recommended dark-bg">
     <div class="container">
         <h2>{{ $row['recommend_title'] }}</h2>
-        <div class="listing flex jc-center">
+        <div class="listing flex jc-center flex-wrap">
             @foreach($row['recommend_repeater'] as $block)
                 <div class="block flex flex-column ai-center">
                     <img src="{{$block['image']}}" alt="">

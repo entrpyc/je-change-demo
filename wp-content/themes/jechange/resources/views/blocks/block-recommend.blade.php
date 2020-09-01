@@ -1,17 +1,32 @@
-{{ $row['block-recommend'] }}
-@if($row['recommend_repeater'])
-    @foreach($row['recommend_repeater'] as $item)
-        {{ $item['title'] }}
-        <img src="{{ $item['image'] }}" alt="img">
-        {{ $item['bold_text'] }}
-        {{ $item['orange_text'] }}
-        {{ $item['small_text'] }}
-        {{ $item['content'] }}
-        {{ $item['green_button_text'] }}
-        {{ $item['green_button_link'] }}
-        {{ $item['phone_button_text'] }}
-        {{ $item['phone_button_number'] }}
-        {{ $item['yellow_button_text'] }}
-        {{ $item['yellow_button_link'] }}
-    @endforeach
-@endif
+<section class="recommended dark-bg">
+    <div class="container">
+        <h2>{{ $row['recommend_title'] }}</h2>
+        <div class="listing flex jc-center">
+            @foreach($row['recommend_repeater'] as $block)
+                <div class="block flex flex-column ai-center">
+                    <img src="{{$block['image']}}" alt="">
+                    <p class="title">{{$block['title']}}</p>
+                    <div class="bold-text">{{$block['bold_text']}}</div>
+                    <div class="free-text">
+                        {!! $block['content'] !!}
+                    </div>
+                    @foreach($block['buttons'] as $button)
+
+                    @if($button['acf_fc_layout'] != 'phone_button')
+                        <div class="button">
+                            <a class="{{$button['acf_fc_layout']}}" 
+                            href="{{$button['link']}}">{{$button['text']}}</a>
+                        </div>
+                    @else
+                        <div class="button button-border"><a href="{{$button['phone']}}" class="flex flex-column ai-center jc-center">
+                            <div class="btn">{{$button['text']}}<br><span class="num">{{$button['phone']}}</span></div>
+                            <span class="text">{{$button['semi']}}</span></a>
+                        </div>
+                    @endif
+
+                    @endforeach
+                </div>
+            @endforeach
+        </div>
+    </div>
+</section>

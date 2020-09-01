@@ -53,6 +53,7 @@
 
 .hero-orange-regular {
   background-color: #ffa200 !important;
+  padding: 50px 0;
 
   .info {
     h1 {
@@ -77,22 +78,10 @@
     }
 
     .buttons-wrapper {
-      .green-btn {
-        a {
-          background-color: #14f397;
-          border-color: #fefefe;
-          color: #0a0a0a;
-          text-align: center;
-          border-radius: 99em;
-          border-style: solid;
-          border-width: 2px;
-          cursor: pointer;
-          position: relative;
-          text-decoration: none;
-          font-weight: 600;
-          outline: 0;
-          height: 229px;
-        }
+      margin-top: 2.5rem;
+
+      .button-border {
+        margin-left: 10px;
       }
     }
   }

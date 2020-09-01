@@ -43,7 +43,6 @@
   width: auto;
   border-radius: 99em;
   border-style: solid;
-  border-width: 2px;
   color: #0a0a0a;
   cursor: pointer;
   font-weight: 800;
@@ -54,6 +53,19 @@
   border: 0;
   font-size: 100%;
   display: block;
+
+  &.border {
+    // border-width: 2px;
+    border: 2px solid #fff;
+  }
+
+  &.expand {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 217px;
+  }
 }
 
 .orange-border-button {

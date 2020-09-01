@@ -1,4 +1,4 @@
-<section class="block phone-contact vr-g @if($row['contact_sm_orange_background']) orange-bg @endif">
+<section class="block phone-contact @if($row['contact_sm_orange_background']) orange-bg @endif">
   <div class="container flex flex-column ai-center">
     @if($row['contact_sm_title']) <h2>{{ $row['contact_sm_title'] }}</h2> @endif
     @if($row['contact_sm_content'])

@@ -19,7 +19,7 @@
 </section>
 @else 
 <section class="block hero-orange-regular">
-  <div class="container flex">
+  <div class="container flex jc-sb">
     <div class="info">
       <h1>{{ $row['hero_title'] }}</h1>
       @if($row['hero_text'])
@@ -28,8 +28,8 @@
         </div>
       @endif
       <div class="buttons-wrapper flex jc-start ai-stretch">
-        <div class="green-btn">
-          <a href="{{$row['hero_green_button_link']}}">@if($row['hero_green_button_icon'])<img src="{{$row['hero_green_button_icon']}}" alt="">@endif{{$row['hero_green_button_text']}}</a>
+        <div>
+          <a class="green-button border expand" href="{{$row['hero_green_button_link']}}">@if($row['hero_green_button_icon'])<img src="{{$row['hero_green_button_icon']}}" alt="">@endif{{$row['hero_green_button_text']}}</a>
         </div>
         <div class="button-border"><a href="tel:+33800811911" class="flex flex-column ai-center jc-center">
           <div class="btn">Ou appelez directement le :<br><span class="num">0800 811 911</span></div>

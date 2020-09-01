@@ -1,4 +1,7 @@
 .phone-contact {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+
   h2 {
     color: #ffa200;
     margin-bottom: 0.75rem;
@@ -31,5 +34,13 @@
 
   .button-border {
     margin-top: 22px;
+  }
+
+  &.orange-bg {
+    background-color: #ffa200;
+
+    h2 {
+      color: #000;
+    }
   }
 }
